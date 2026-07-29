@@ -1,0 +1,44 @@
+# ==============================================================================
+#  matugen — estrae una palette Material You dallo sfondo e riscrive i file di
+#  colore di barra, bordi finestre, launcher e terminale.
+#
+#  Non va lanciato a mano: lo chiama ~/.config/hypr/scripts/sfondo.sh (SUPER+W),
+#  che dopo la generazione ricarica i programmi interessati.
+#
+#  PERCHE' MATERIAL YOU e non "i colori dominanti dell'immagine": Material You
+#  parte da un colore sorgente e ne DERIVA i ruoli (fondo, testo, accento)
+#  rispettando i rapporti di contrasto. Prendere i colori piu' frequenti
+#  dell'immagine da' palette che su certi sfondi sono illeggibili.
+# ==============================================================================
+
+[config]
+# Nessun reload automatico: lo fa sfondo.sh, che sa quali programmi girano
+# davvero e con che segnale si ricaricano.
+reload_apps = false
+
+# ------------------------------------------------------------------------ barra
+[templates.waybar]
+input_path  = '~/.config/matugen/templates/waybar-colori.css'
+output_path = '~/.config/waybar/colori.css'
+
+# ------------------------------------------------------- bordi finestre e ombra
+[templates.hyprland]
+input_path  = '~/.config/matugen/templates/hypr-colori.conf'
+output_path = '~/.config/hypr/colori.conf'
+
+# --------------------------------------------------------------------- launcher
+[templates.fuzzel]
+input_path  = '~/.config/matugen/templates/fuzzel-colori.ini'
+output_path = '~/.config/fuzzel/colori.ini'
+
+# --------------------------------------------------------------------- terminale
+[templates.alacritty]
+input_path  = '~/.config/matugen/templates/alacritty-colori.toml'
+output_path = '~/.config/alacritty/colori.toml'
+
+# ------------------------------------------------------------ centro notifiche
+# Attivo solo quando swaync e' installato; se il template manca matugen
+# salta la voce senza fallire.
+[templates.swaync]
+input_path  = '~/.config/matugen/templates/swaync-colori.css'
+output_path = '~/.config/swaync/colori.css'

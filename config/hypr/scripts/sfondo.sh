@@ -111,4 +111,31 @@ if n == 0:
 conf.write_text(nuovo)
 PY
 
+################################################################################
+#  5. Rigenera la palette dallo sfondo e ricarica chi la usa
+################################################################################
+# --prefer saturation NON e' opzionale: quando da un'immagine si possono
+# estrarre piu' colori sorgente, matugen normalmente chiede all'utente quale
+# usare. Lanciato da una scorciatoia non c'e' nessun terminale a cui chiedere e
+# fallisce con "a terminal was not detected". Con --prefer sceglie da se'.
+# "saturation" = il piu' saturo fra i candidati: da' accenti vivi invece di
+# grigi slavati.
+if command -v matugen >/dev/null; then
+    if matugen --quiet --prefer saturation image "$img" 2>/dev/null; then
+
+        # Ognuno si ricarica a modo suo. Nessuno di questi riavvia il
+        # programma: sono ricariche a caldo, non si perde nulla.
+        #   waybar     -> SIGUSR2 rilegge config e CSS
+        #   hyprland   -> reload rilegge, e con esso il `source` dei colori
+        #   swaync     -> -rs = reload style
+        #   fuzzel     -> niente: legge la config ad ogni apertura
+        #   alacritty  -> niente: rilegge da se' quando il file cambia
+        pkill -x -SIGUSR2 waybar 2>/dev/null || true
+        hyprctl reload >/dev/null 2>&1 || true
+        command -v swaync-client >/dev/null && swaync-client -rs >/dev/null 2>&1 || true
+    else
+        avvisa "Sfondo cambiato, ma la palette non e' stata rigenerata"
+    fi
+fi
+
 avvisa "$(basename "$img")"

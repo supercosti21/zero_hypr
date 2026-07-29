@@ -1,0 +1,40 @@
+# GENERATO DA MATUGEN — non modificare a mano.
+# Sorgente: ~/.config/matugen/templates/alacritty-colori.toml
+# Incluso da alacritty.toml. Alacritty rilegge da solo al salvataggio: le
+# finestre aperte cambiano colore senza riaprirle.
+#
+# I 16 colori ANSI vengono dalla palette base16 che matugen ricava dallo
+# sfondo: sono coerenti fra loro e mantengono le distanze fra le tinte, cosa
+# che prendendo colori Material a caso non succederebbe.
+
+[colors.primary]
+background = "{{colors.surface.default.hex}}"
+foreground = "{{colors.on_surface.default.hex}}"
+
+[colors.cursor]
+text   = "{{colors.on_primary.default.hex}}"
+cursor = "{{colors.primary.default.hex}}"
+
+[colors.selection]
+text       = "{{colors.on_surface.default.hex}}"
+background = "{{colors.surface_container_highest.default.hex}}"
+
+[colors.normal]
+black   = "{{base16.base00.default.hex}}"
+red     = "{{base16.base08.default.hex}}"
+green   = "{{base16.base0b.default.hex}}"
+yellow  = "{{base16.base0a.default.hex}}"
+blue    = "{{base16.base0d.default.hex}}"
+magenta = "{{base16.base0e.default.hex}}"
+cyan    = "{{base16.base0c.default.hex}}"
+white   = "{{base16.base05.default.hex}}"
+
+[colors.bright]
+black   = "{{base16.base03.default.hex}}"
+red     = "{{base16.base08.default.hex}}"
+green   = "{{base16.base0b.default.hex}}"
+yellow  = "{{base16.base09.default.hex}}"
+blue    = "{{base16.base0d.default.hex}}"
+magenta = "{{base16.base0f.default.hex}}"
+cyan    = "{{base16.base0c.default.hex}}"
+white   = "{{base16.base07.default.hex}}"

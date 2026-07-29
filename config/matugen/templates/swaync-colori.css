@@ -1,0 +1,11 @@
+/* GENERATO DA MATUGEN — non modificare a mano.
+   Sorgente: ~/.config/matugen/templates/swaync-colori.css */
+
+@define-color sfondo       {{colors.surface.default.hex}};
+@define-color sfondo_alt   {{colors.surface_container.default.hex}};
+@define-color testo        {{colors.on_surface.default.hex}};
+@define-color testo_tenue  {{colors.on_surface_variant.default.hex}};
+@define-color accento      {{colors.primary.default.hex}};
+@define-color su_accento   {{colors.on_primary.default.hex}};
+@define-color contorno     {{colors.outline.default.hex}};
+@define-color urgente      {{colors.error.default.hex}};

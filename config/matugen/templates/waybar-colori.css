@@ -1,0 +1,16 @@
+/* GENERATO DA MATUGEN — non modificare a mano.
+   Sorgente: ~/.config/matugen/templates/waybar-colori.css
+   Rigenerato ad ogni cambio sfondo (SUPER+W).
+
+   I nomi sono semantici, non "blu/rosso": e' cio' che permette a style.css di
+   funzionare con qualsiasi sfondo, chiaro o scuro, senza toccare una riga. */
+
+@define-color sfondo       {{colors.surface.default.hex}};
+@define-color testo        {{colors.on_surface.default.hex}};
+@define-color testo_tenue  {{colors.on_surface_variant.default.hex}};
+@define-color accento      {{colors.primary.default.hex}};
+@define-color su_accento   {{colors.on_primary.default.hex}};
+@define-color contorno     {{colors.outline.default.hex}};
+@define-color urgente      {{colors.error.default.hex}};
+@define-color su_urgente   {{colors.on_error.default.hex}};
+@define-color avviso       {{colors.tertiary.default.hex}};

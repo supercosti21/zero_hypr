@@ -1,0 +1,24 @@
+# ==============================================================================
+#  Alacritty — terminale. Scelto perche' e' accelerato in GPU e parte in pochi
+#  millisecondi. I colori NON stanno qui: arrivano da colori.toml, rigenerato
+#  dallo sfondo da matugen (SUPER+W). Alacritty rilegge la config al
+#  salvataggio, quindi le finestre aperte cambiano colore da sole.
+# ==============================================================================
+
+general.import = ["~/.config/alacritty/colori.toml"]
+
+[window]
+padding = { x = 10, y = 8 }
+dynamic_padding = true
+opacity = 1.0
+decorations = "none"
+
+[font]
+normal = { family = "MesloLGS Nerd Font", style = "Regular" }
+size = 11.0
+
+[scrolling]
+history = 10000
+
+[cursor]
+style = { shape = "Block", blinking = "Off" }
