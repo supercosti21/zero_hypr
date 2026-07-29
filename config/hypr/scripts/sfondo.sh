@@ -18,6 +18,7 @@ set -euo pipefail
 
 CARTELLA="${SFONDI_DIR:-$HOME/Git/wallpapers}"
 CONF="$HOME/.config/hypr/hyprpaper.conf"
+QUI="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 avvisa() {
     command -v notify-send >/dev/null && notify-send -a sfondo "Sfondo" "$1" \
@@ -138,7 +139,20 @@ if [ -z "$MATUGEN" ]; then
     # Silenzio no: se la palette non si rigenera si deve sapere perche'.
     avvisa "Sfondo cambiato. matugen non trovato: i colori restano quelli di prima."
 else
-    if "$MATUGEN" --quiet --prefer saturation image "$img" 2>/dev/null; then
+    # -j hex: oltre a riscrivere i template, matugen sputa la palette in json
+    # sullo standard output. Serve a colori-terminale.py, che dai ruoli Material
+    # (fondo, testo, accento) costruisce i 16 colori ANSI del terminale con il
+    # contrasto garantito. Non li fa matugen perche' non puo': vedi il commento
+    # nel suo config.toml.
+    if palette=$("$MATUGEN" --quiet --prefer saturation -j hex image "$img" 2>/dev/null); then
+
+        # L'errore non si butta via: finisce nella notifica, altrimenti il
+        # terminale resterebbe coi colori vecchi senza dire perche'. Si tiene
+        # l'ultima riga, che di un traceback e' quella che dice qualcosa.
+        if ! motivo=$(printf '%s' "$palette" \
+            | python3 "$QUI/colori-terminale.py" 2>&1); then
+            avvisa "Colori aggiornati, tranne il terminale: ${motivo##*$'\n'}"
+        fi
 
         # Ognuno si ricarica a modo suo. Nessuno di questi riavvia il
         # programma: sono ricariche a caldo, non si perde nulla.

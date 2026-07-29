@@ -32,9 +32,15 @@ input_path  = '~/.config/matugen/templates/fuzzel-colori.ini'
 output_path = '~/.config/fuzzel/colori.ini'
 
 # --------------------------------------------------------------------- terminale
-[templates.alacritty]
-input_path  = '~/.config/matugen/templates/alacritty-colori.toml'
-output_path = '~/.config/alacritty/colori.toml'
+# I colori del terminale NON li fa matugen, e non e' una dimenticanza. Un
+# template puo' solo copiare colori dalla palette: per i 16 colori ANSI l'unico
+# blocco disponibile e' base16, che matugen ricava come scala tonale di una sola
+# tinta. Su uno sfondo poco variegato quei 16 colori finiscono tutti a un passo
+# dal fondo — contrasti misurati fra 1.0 e 1.4 su un minimo leggibile di 4.5,
+# cioe' testo invisibile. Serve calcolare le luminosita' a partire dal contrasto
+# richiesto, che un template non sa fare: lo fa
+# ~/.config/hypr/scripts/colori-terminale.py, chiamato da sfondo.sh subito dopo
+# matugen, che riceve questa stessa palette in json.
 
 # ------------------------------------------------------------ centro notifiche
 # Attivo solo quando swaync e' installato; se il template manca matugen

@@ -1,0 +1,94 @@
+# SEME INIZIALE — non e' questo il file che il terminale legge.
+# installa.sh lo copia in colori.toml (che e' in .gitignore) su una macchina
+# nuova: sono i colori che si vedono finche' non si cambia sfondo la prima
+# volta. I ruoli di partenza sono Catppuccin Mocha, lo stesso fallback di
+# waybar e hyprlock. Per rigenerarlo:
+#
+#   printf '{"colors":{"surface":{"default":{"color":"#1e1e2e"}}, ...}}' \
+#     | colori-terminale.py --out config/alacritty/colori.default.toml
+#
+# Da qui in giu' e' l'intestazione prodotta dal generatore.
+#
+# Sorgente: ~/.config/hypr/scripts/colori-terminale.py, che gira dopo matugen
+# ad ogni cambio sfondo (SUPER+W). Alacritty rilegge la config al salvataggio:
+# le finestre aperte cambiano colore senza riaprirle.
+#
+# I 16 colori ANSI non arrivano dalla palette base16 di matugen (che e' una
+# scala tonale di una sola tinta e su sfondi monocromatici dava contrasti da
+# 1.0, cioe' testo invisibile): sono costruiti dalle tinte ANSI canoniche,
+# inclinate di pochi gradi verso l'accento dello sfondo, con la luminosita'
+# risolta per raggiungere un contrasto minimo garantito su QUESTO sfondo.
+#
+# Contrasto WCAG misurato contro il fondo #1e1e2e — minimo leggibile 4.5:
+#   normali   bla  3.0  red  5.2  gre  6.4  yel  7.2  blu  5.2  mag  5.6  cya  6.0  whi 10.0
+#   brillanti bla  4.6  red  7.5  gre  8.7  yel  9.5  blu  7.5  mag  7.9  cya  8.4  whi 13.6
+#   attenuati bla  3.0  red  4.6  gre  5.2  yel  5.6  blu  4.6  mag  4.8  cya  5.0  whi  4.6
+#   testo     11.3   cursore  7.8   selezione  7.0   ricerca  7.5
+
+[colors.primary]
+background       = "#1e1e2e"
+foreground       = "#cdd6f4"
+dim_foreground   = "#9aa3bf"
+bright_foreground = "#ffffff"
+
+[colors.cursor]
+text   = "#1e1e2e"
+cursor = "#89b4fa"
+
+[colors.vi_mode_cursor]
+text   = "#1e1e2e"
+cursor = "#89b4fa"
+
+[colors.selection]
+text       = "#d8e1ff"
+background = "#45475a"
+
+[colors.search.matches]
+foreground = "#cdd6f4"
+background = "#3a3c4e"
+
+[colors.search.focused_match]
+foreground = "#1e1e2e"
+background = "#f9e2af"
+
+[colors.footer_bar]
+foreground = "#cdd6f4"
+background = "#3a3c4e"
+
+[colors.hints.start]
+foreground = "#1e1e2e"
+background = "#f9e2af"
+
+[colors.hints.end]
+foreground = "#d8e1ff"
+background = "#45475a"
+
+[colors.normal]
+black   = "#636a76"
+red     = "#da736c"
+green   = "#5ab472"
+yellow  = "#b9ae40"
+blue    = "#6890e2"
+magenta = "#c080cd"
+cyan    = "#00adb8"
+white   = "#c7cbd1"
+
+[colors.bright]
+black   = "#818995"
+red     = "#ff9188"
+green   = "#5ed480"
+yellow  = "#d6c831"
+blue    = "#87afff"
+magenta = "#e896f9"
+cyan    = "#00cdda"
+white   = "#e6eaf1"
+
+[colors.dim]
+black   = "#636a76"
+red     = "#b67772"
+green   = "#6a9d75"
+yellow  = "#9e995e"
+blue    = "#6f88b9"
+magenta = "#a47eac"
+cyan    = "#489aa1"
+white   = "#85888e"

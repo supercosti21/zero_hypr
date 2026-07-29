@@ -122,6 +122,52 @@ I fogli di stile **non contengono colori**: solo forme, spazi e stati, con nomi
 semantici (`@sfondo`, `@accento`, `@testo_tenue`). È il motivo per cui lo stesso
 CSS funziona con qualsiasi sfondo, chiaro o scuro.
 
+#### Il terminale è l'eccezione: contrasto calcolato, non copiato
+
+Per barra, bordi e launcher basta copiare i ruoli Material You: sono definiti in
+coppie (`surface`/`on_surface`, `primary`/`on_primary`) e il contrasto lo
+garantisce lo standard. Per i 16 colori ANSI del terminale non c'è nessun ruolo:
+l'unico blocco da 16 che matugen produce è `base16`, che però è la **scala
+tonale di una sola tinta**, quella dello sfondo. Su un'immagine poco variegata
+tutti e 16 finiscono a un passo dal fondo — contrasti misurati:
+
+| | nero | verde | giallo | blu | magenta | ciano |
+|---|---|---|---|---|---|---|
+| base16 | 1.10 | 1.13 | 1.37 | **1.02** | **1.00** | 1.06 |
+
+Con 4.5 come minimo leggibile: fastfetch, `ls`, i prompt e i diff di `git`
+scrivevano nero su nero. Non era uno sfondo sfortunato — `base16` non ha alcun
+vincolo di contrasto, quindi ricapita.
+
+Quei 16 colori li costruisce
+[`config/hypr/scripts/colori-terminale.py`](config/hypr/scripts/colori-terminale.py),
+che `sfondo.sh` chiama subito dopo matugen passandogli la palette in json:
+
+- le **tinte** partono dagli angoli ANSI canonici in OKLCh, non dallo sfondo:
+  rosso resta rosso. Dello sfondo si prende solo l'accento, che le inclina di
+  pochi gradi (max 8, e la metà su rosso e giallo, che portano un significato);
+- la **luminosità** non è scelta a occhio: si cerca la più bassa che raggiunge il
+  contrasto richiesto su *quel* fondo. La più bassa perché in OKLCh la croma
+  disponibile cala salendo, quindi fermarsi appena superata la soglia dà il
+  colore più vivo fra quelli leggibili;
+- le soglie sono una scala — normali 5.2, brillanti 7.5 — così «brillante» è
+  davvero più chiaro di «normale» invece di somigliargli;
+- ogni tinta ha un margine in più sopra la soglia (giallo il più chiaro, blu il
+  più scuro, come nei temi ANSI di sempre). Serve a chi non distingue
+  rosso/verde, e in bianco e nero a tutti: senza, i sei colori avrebbero per
+  costruzione la stessa luminanza e si distinguerebbero *solo* per tinta;
+- passano dallo stesso controllo anche le coppie che di solito nessuno guarda:
+  testo dentro la selezione, testo dentro il cursore, barra di ricerca,
+  suggerimenti dei link, testo attenuato (`SGR 2`).
+
+Il file generato si porta dietro la tabella dei contrasti ottenuti, in testa.
+Per vederla senza cambiare niente:
+
+```bash
+matugen --quiet -j hex image ~/Git/wallpapers/foto.jpg \
+  | ~/.config/hypr/scripts/colori-terminale.py --prova --tabella
+```
+
 ---
 
 ## Segreti e portachiavi
