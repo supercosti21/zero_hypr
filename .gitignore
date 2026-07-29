@@ -1,0 +1,24 @@
+# ==============================================================================
+#  File rigenerati, che non hanno senso in cronologia
+# ==============================================================================
+# Palette prodotte da matugen a partire dallo sfondo: cambiano ad ogni SUPER+W
+# e riempirebbero la storia di commit inutili. In repo stanno i corrispondenti
+# *.default.*, che installa.sh copia al primo avvio come punto di partenza.
+config/waybar/colori.css
+config/hypr/colori.conf
+config/swaync/colori.css
+config/alacritty/colori.toml
+config/fuzzel/colori.ini
+
+# ==============================================================================
+#  Backup e scarti
+# ==============================================================================
+*.bak
+*.bak-*
+*.orig
+*~
+.DS_Store
+
+# Cartelle salvate da installa.sh prima di creare i symlink: sono copie della
+# situazione precedente, servono solo in locale.
+*.pre-git

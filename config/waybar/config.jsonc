@@ -1,0 +1,164 @@
+// ============================================================================
+//  Waybar — pillola singola flottante.
+//
+//  Filosofia: in barra ci sta SOLO cio' che si guarda di sfuggita. Tutto il
+//  resto (essid, IP, salute batteria, dispositivi bluetooth) sta nel tooltip
+//  o dietro un click. Niente cpu/ram/temperatura: sono numeri che non si
+//  guardano mai davvero e costano un risveglio ogni pochi secondi — su
+//  portatile e' il contrario di "ottimizzato".
+//
+//  I colori non stanno qui: arrivano da colori.css, rigenerato dallo sfondo da
+//  matugen. Anche il calendario non ha colori scritti a mano, cosi' segue il
+//  tema da solo (vedi style.css, sezione tooltip).
+//
+//  Dopo una modifica:  killall -SIGUSR2 waybar
+// ============================================================================
+{
+  "layer": "top",
+  "position": "top",
+  "height": 38,
+
+  // Margini su tutti i lati: e' cio' che la rende "flottante".
+  "margin-top": 8,
+  "margin-left": 12,
+  "margin-right": 12,
+
+  // Spaziatura gestita in CSS col padding dei moduli, non qui: cosi' le zone
+  // cliccabili si toccano e non restano fessure morte fra le icone.
+  "spacing": 0,
+
+  "modules-left":   ["hyprland/workspaces"],
+  "modules-center": ["hyprland/window"],
+  "modules-right":  [
+    "network",
+    "bluetooth",
+    "battery",
+    "clock",
+    "custom/notifiche",
+    "custom/power"
+  ],
+
+  // ------------------------------------------------------------------ sinistra
+  // I workspace sono dinamici in stile COSMIC: li crea e distrugge
+  // scripts/workspace-dinamici.py, che tiene sempre un vuoto in coda.
+  // Qui NON va "persistent-workspaces": sarebbe un elenco fisso e litigherebbe
+  // col demone.
+  "hyprland/workspaces": {
+    "format": "{id}",
+    "on-click": "activate",
+    "sort-by-number": true,
+    "tooltip": false
+  },
+
+  // ------------------------------------------------------------------- centro
+  "hyprland/window": {
+    "format": "{title}",
+    "max-length": 55,
+    "separate-outputs": true,
+    "tooltip": false,
+    "rewrite": {
+      "(.*) — Brave": "$1",
+      "(.*) - Trae": "$1",
+      "^$": "scrivania"
+    }
+  },
+
+  // -------------------------------------------------------------------- destra
+  // Niente tray, per scelta. Gli applet che ci finivano dentro (nm-applet,
+  // blueman-applet) duplicavano esattamente le icone rete e bluetooth che
+  // stanno gia' qui in barra. Al posto del secret agent di nm-applet c'e'
+  // scripts/wifi.sh, che chiede la password in fuzzel.
+  "network": {
+    // Solo l'icona: la potenza del segnale si legge dalla sua forma, una
+    // percentuale in barra sarebbe rumore.
+    "format-wifi": "{icon}",
+    "format-icons": ["󰤟", "󰤢", "󰤥", "󰤨"],
+    "format-ethernet": "󰈀",
+    "format-disconnected": "󰤮",
+    "tooltip-format-wifi": "{essid}   {signalStrength}%\n{ipaddr}\n↓ {bandwidthDownBits}   ↑ {bandwidthUpBits}",
+    "tooltip-format-ethernet": "{ifname}\n{ipaddr}",
+    "tooltip-format-disconnected": "Nessuna rete",
+    "interval": 8,
+    // Click = selettore reti in fuzzel (scansione, scelta, password mascherata).
+    // Tasto destro = l'editor completo, per VPN e IP statici.
+    "on-click": "~/.config/hypr/scripts/wifi.sh",
+    "on-click-right": "nm-connection-editor"
+  },
+
+  "bluetooth": {
+    "format": "󰂯",
+    "format-disabled": "󰂲",
+    "format-off": "󰂲",
+    "format-connected": "󰂱",
+    "tooltip-format": "Bluetooth attivo",
+    "tooltip-format-connected": "{num_connections} connessi\n{device_enumerate}",
+    "tooltip-format-disabled": "Bluetooth spento",
+    "on-click": "blueman-manager"
+  },
+
+  "battery": {
+    "bat": "BAT1",
+    "adapter": "ACAD",
+    "interval": 30,
+    "states": { "warning": 25, "critical": 12 },
+    "format": "{icon} {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-plugged": "󰚥 {capacity}%",
+    "format-icons": ["󰁺", "󰁼", "󰁾", "󰂀", "󰂂", "󰁹"],
+    "tooltip-format": "{timeTo}\n{power} W"
+  },
+
+  "clock": {
+    "interval": 30,
+    // Lingua di sistema: inglese ovunque per scelta (solo la tastiera e' it,
+    // in hyprland.conf -> input:kb_layout). Quindi nessun "locale" qui e
+    // nessun flag L: le date restano in inglese come il resto del sistema.
+    "format": "{:%a %d  %H:%M}",
+    "tooltip-format": "<tt>{calendar}</tt>",
+    "calendar": {
+      "mode": "month",
+      "mode-mon-col": 3,
+      "on-scroll": 1,
+      // Nessun colore scritto a mano: grassetto e sottolineato per distinguere,
+      // il colore lo da' il CSS (quindi lo sfondo). Con i colori fissi qui il
+      // calendario sarebbe l'unica cosa che non segue il tema.
+      "format": {
+        "today":    "<b><u>{}</u></b>",
+        "weekdays": "<b>{}</b>"
+      }
+    },
+    "actions": {
+      "on-click-right":  "mode",
+      "on-scroll-up":    "shift_up",
+      "on-scroll-down":  "shift_down"
+    }
+  },
+
+  // Campanella del centro notifiche. In "subscribe mode": swaync spinge lo
+  // stato quando cambia, invece di farsi interrogare a intervalli.
+  "custom/notifiche": {
+    "tooltip": false,
+    "format": "{icon}",
+    "format-icons": {
+      "notification":               "󰂚",
+      "none":                       "󰂜",
+      "dnd-notification":           "󰂛",
+      "dnd-none":                   "󰂛",
+      "inhibited-notification":     "󰂚",
+      "inhibited-none":             "󰂜",
+      "dnd-inhibited-notification": "󰂛",
+      "dnd-inhibited-none":         "󰂛"
+    },
+    "return-type": "json",
+    "exec": "swaync-client -swb",
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true
+  },
+
+  "custom/power": {
+    "format": "󰐥",
+    "tooltip": false,
+    "on-click": "~/.config/hypr/scripts/menu-power.sh"
+  }
+}

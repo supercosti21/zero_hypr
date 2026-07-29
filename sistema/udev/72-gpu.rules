@@ -1,0 +1,8 @@
+# Symlink stabili per le GPU, senza due punti nel nome.
+# Servono perche' AQ_DRM_DEVICES (Hyprland/aquamarine) separa la lista di GPU
+# con ":", quindi i nomi di /dev/dri/by-path/ (es. pci-0000:00:02.0-card)
+# vengono spezzati e la lista risulta invalida.
+#   /dev/dri/igpu -> Intel Iris Xe   (PCI 0000:00:02.0)
+#   /dev/dri/dgpu -> NVIDIA RTX 4060 (PCI 0000:01:00.0)
+SUBSYSTEM=="drm", KERNEL=="card[0-9]*", KERNELS=="0000:00:02.0", SYMLINK+="dri/igpu"
+SUBSYSTEM=="drm", KERNEL=="card[0-9]*", KERNELS=="0000:01:00.0", SYMLINK+="dri/dgpu"

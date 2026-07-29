@@ -1,0 +1,4 @@
+# Cambia profilo energetico quando l'alimentatore viene attaccato/staccato.
+# systemd-run --no-block: udev non aspetta la chiamata DBus a power-profiles-daemon.
+SUBSYSTEM=="power_supply", KERNEL=="ACAD", ATTR{online}=="0|1", \
+	RUN+="/usr/bin/systemd-run --no-block /usr/local/bin/power-profile-auto"

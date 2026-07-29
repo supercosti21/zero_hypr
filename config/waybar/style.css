@@ -1,0 +1,210 @@
+/* ==========================================================================
+   Waybar — pillola singola flottante.
+
+   QUI NON CI SONO COLORI. Arrivano tutti da colori.css, che matugen rigenera
+   dallo sfondo ad ogni cambio (SUPER+W). Questo file definisce solo forme,
+   spazi e stati: cosi' il tema cambia senza mai riscrivere il layout.
+
+   I nomi dei colori sono semantici (@sfondo, @accento, @testo...) e non
+   "blu/rosso": e' il motivo per cui lo stesso foglio funziona con qualsiasi
+   sfondo, chiaro o scuro.
+
+   L'alpha sul fondo e' cio' che fa scattare il blur: in hyprland.conf c'e'
+   `layerrule = blur true, match:namespace waybar`, e il blur costa GPU solo
+   dove c'e' davvero trasparenza.
+   ========================================================================== */
+
+@import url("colori.css");
+
+/* --------------------------------------------------------------- fondamenta */
+* {
+    /* Nessun bordo/padding ereditato a sorpresa: si parte da zero. */
+    border: none;
+    border-radius: 0;
+    min-height: 0;
+    font-family: "MesloLGS Nerd Font", "Noto Sans", sans-serif;
+    font-size: 13px;
+    /* Font feature: cifre a larghezza fissa, cosi' l'orologio e la percentuale
+       batteria non fanno "ballare" la barra ad ogni cambio di cifra. */
+    font-feature-settings: "tnum";
+}
+
+/* La pillola: il fondo sta sulla finestra, non sui moduli. E' cio' che rende
+   la barra UN contenitore unico invece di tante isole. */
+window#waybar {
+    background: alpha(@sfondo, 0.72);
+    color: @testo;
+    border: 1px solid alpha(@contorno, 0.30);
+    border-radius: 19px;   /* meta' dell'altezza (38) = pillola perfetta */
+}
+
+/* Barra in secondo piano quando una finestra e' a schermo intero: si smorza
+   invece di sparire, cosi' resta leggibile l'ora ma non ruba attenzione. */
+window#waybar.fullscreen {
+    background: alpha(@sfondo, 0.45);
+}
+
+/* ------------------------------------------------------------------ workspace */
+#workspaces {
+    padding: 0 4px;
+    margin-left: 4px;
+}
+
+#workspaces button {
+    color: @testo_tenue;
+    background: transparent;
+    padding: 0 10px;
+    margin: 5px 2px;
+    border-radius: 12px;
+    /* Transizione corta e solo sul colore: 120 ms non si notano in consumo,
+       ma togliergli del tutto lo stacco fa sembrare la barra "morta".
+       Niente animazioni in loop da nessuna parte: con il VFR attivo un
+       lampeggio terrebbe la GPU sveglia per sempre. */
+    transition: background-color 120ms ease-out, color 120ms ease-out;
+}
+
+#workspaces button:hover {
+    background: alpha(@testo, 0.10);
+    color: @testo;
+    /* GTK mette un rilievo sul :hover dei bottoni: va spento a mano. */
+    box-shadow: none;
+    text-shadow: none;
+}
+
+#workspaces button.active {
+    color: @su_accento;
+    background: @accento;
+}
+
+/* Finestra che chiede attenzione su un altro workspace. */
+#workspaces button.urgent {
+    color: @su_urgente;
+    background: @urgente;
+}
+
+/* --------------------------------------------------------- titolo finestra */
+#window {
+    color: @testo_tenue;
+    font-size: 12.5px;
+    padding: 0 12px;
+}
+
+/* "scrivania" (nessuna finestra) e' informazione di sfondo: si smorza. */
+window#waybar.empty #window {
+    color: alpha(@testo_tenue, 0.55);
+}
+
+/* ------------------------------------------------------------ moduli destra */
+#tray,
+#network,
+#bluetooth,
+#battery,
+#clock,
+#custom-notifiche,
+#custom-power {
+    padding: 0 9px;
+    margin: 5px 1px;
+    border-radius: 12px;
+    color: @testo;
+    background: transparent;
+    transition: background-color 120ms ease-out;
+}
+
+#network:hover,
+#bluetooth:hover,
+#battery:hover,
+#clock:hover,
+#custom-notifiche:hover {
+    background: alpha(@testo, 0.10);
+}
+
+/* L'orologio e' l'ancora visiva della barra: leggermente piu' marcato. */
+#clock {
+    color: @testo;
+    font-weight: 600;
+    padding: 0 11px;
+}
+
+/* Stati batteria. Nessun lampeggio: su un portatile un'animazione perpetua
+   impedisce al compositore di stare fermo, cioe' consuma proprio la batteria
+   di cui sta avvisando. Il colore pieno basta a farsi notare. */
+#battery.warning {
+    color: @avviso;
+}
+
+#battery.critical {
+    color: @su_urgente;
+    background: @urgente;
+}
+
+#battery.charging,
+#battery.plugged {
+    color: @accento;
+}
+
+/* Rete assente: smorzata, non allarmante. Non e' un errore, e' uno stato. */
+#network.disconnected,
+#bluetooth.disabled,
+#bluetooth.off {
+    color: alpha(@testo_tenue, 0.6);
+}
+
+/* Campanella: si accende solo quando c'e' davvero qualcosa da leggere. */
+#custom-notifiche {
+    padding: 0 10px;
+}
+
+#custom-notifiche.notification {
+    color: @accento;
+}
+
+#custom-notifiche.dnd-notification,
+#custom-notifiche.dnd-none {
+    color: alpha(@testo_tenue, 0.6);
+}
+
+/* Spegnimento: neutro a riposo, rosso solo sotto il puntatore. Un tasto che
+   spegne il computer non deve essere rosso e invitante tutto il giorno. */
+#custom-power {
+    color: @testo_tenue;
+    margin-right: 5px;
+    padding: 0 11px;
+}
+
+#custom-power:hover {
+    background: @urgente;
+    color: @su_urgente;
+}
+
+#tray {
+    padding: 0 6px;
+}
+
+#tray menu {
+    background: @sfondo;
+    color: @testo;
+    border: 1px solid alpha(@contorno, 0.4);
+    border-radius: 12px;
+}
+
+/* Nota: GTK3 non ha la pseudo-classe :empty (waybar muore all'avvio se la
+   trova), quindi un modulo vuoto non si puo' azzerare per selettore. Per il
+   titolo finestra ci pensa la classe .empty che waybar aggiunge da sola, qui
+   sopra; per il tray basta un padding contenuto, perche' senza icone la sua
+   larghezza e' comunque quasi zero. */
+
+/* ---------------------------------------------------------------- tooltip */
+/* Vale anche per il calendario dell'orologio: siccome nel config non ci sono
+   colori pango scritti a mano, il calendario prende il colore da qui e quindi
+   segue lo sfondo come tutto il resto. */
+tooltip {
+    background: alpha(@sfondo, 0.96);
+    border: 1px solid alpha(@contorno, 0.40);
+    border-radius: 14px;
+}
+
+tooltip label {
+    color: @testo;
+    padding: 4px;
+    font-size: 12.5px;
+}

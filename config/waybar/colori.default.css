@@ -1,0 +1,21 @@
+/* ==========================================================================
+   GENERATO DA MATUGEN — non modificare a mano.
+
+   Questo file viene riscritto ad ogni cambio sfondo (SUPER+W) a partire da
+   ~/.config/matugen/templates/waybar-colori.css. Se vuoi cambiare come i
+   colori vengono assegnati, modifica QUEL file, non questo.
+
+   I valori qui sotto sono solo il fallback iniziale (Catppuccin Mocha): sono
+   quelli che si vedono finche' non si cambia sfondo la prima volta, e quelli
+   su cui la barra ripiega se matugen non fosse disponibile.
+   ========================================================================== */
+
+@define-color sfondo       #1e1e2e;
+@define-color testo        #cdd6f4;
+@define-color testo_tenue  #a6adc8;
+@define-color accento      #89b4fa;
+@define-color su_accento   #1e1e2e;
+@define-color contorno     #585b70;
+@define-color urgente      #f38ba8;
+@define-color su_urgente   #1e1e2e;
+@define-color avviso       #f9e2af;
