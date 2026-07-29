@@ -126,16 +126,55 @@
 }
 
 /* ------------------------------------------------------------- centro notifiche */
+/* Coerente con la barra: stesso colore, stesso bordo (1px alpha(@contorno,0.30)),
+   stesso raggio (19), stesso blur. L'alpha invece NON e' identica ed e' una
+   scelta: la barra e' una striscia alta 38px, dove 0.72 e' un velo; il pannello
+   e' una superficie 20 volte piu' grande, e alla stessa alpha il testo della
+   finestra sottostante ci traspare attraverso rendendolo faticoso da leggere
+   (provato: sopra un terminale pieno di codice era inutilizzabile).
+   0.96 mantiene l'effetto vetro sui bordi ma il contenuto resta leggibile.
+   Coerenza vuol dire stesso linguaggio, non stessi numeri su superfici diverse.
+
+   Gli angoli in alto sono piccoli perche' il pannello e' appeso alla barra:
+   arrotondarli come i bassi creerebbe una strozzatura contro il suo bordo. */
 .control-center {
-    background: alpha(@sfondo, 0.90);
-    border: 1px solid alpha(@contorno, 0.35);
-    border-radius: 20px;
+    background: alpha(@sfondo, 0.96);
+    border: 1px solid alpha(@contorno, 0.30);
+    border-radius: 6px 6px 19px 19px;
     padding: 10px;
     color: @testo;
+
+    /* Questi 12px allineano il bordo destro a quello della barra. Vanno messi
+       qui e non in config.json: `control-center-margin-right` viene ignorato
+       quando layer-shell-cover-screen e' false — la superficie layer resta
+       ancorata al bordo schermo e il margine non ha effetto. Misurato con
+       `hyprctl layers`: barra fino a 1908, pannello fino a 1920. */
+    margin-right: 12px;
 }
 
 .control-center .control-center-list {
     background: transparent;
+}
+
+/* Le notifiche sono raggruppate per applicazione, e il gruppo disegna un
+   PROPRIO fondo: sopra una notifica che ha gia' il suo si vede un doppio
+   riquadro, piu' largo e di grigio diverso. Il gruppo deve essere solo un
+   contenitore invisibile. */
+.notification-group,
+.notification-group.low,
+.notification-group.normal,
+.notification-group.critical,
+.notification-group.collapsed {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+/* L'intestazione del gruppo (nome app) e' un'etichetta di servizio. */
+.notification-group .notification-group-headers,
+.notification-group .notification-group-headers .notification-group-header {
+    color: alpha(@testo_tenue, 0.75);
+    font-size: 11.5px;
 }
 
 /* Il messaggio "Nessuna notifica": presente ma discreto. */

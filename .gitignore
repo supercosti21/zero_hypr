@@ -17,8 +17,15 @@ config/fuzzel/colori.ini
 *.bak-*
 *.orig
 *~
+# Scrittura atomica di colori-terminale.py: il file esiste per un istante fra
+# write e rename, e resta in giro solo se qualcosa si interrompe a metà.
+*.nuovo
 .DS_Store
 
 # Cartelle salvate da installa.sh prima di creare i symlink: sono copie della
 # situazione precedente, servono solo in locale.
 *.pre-git
+
+# Cache di Python accanto agli script
+__pycache__/
+*.pyc
