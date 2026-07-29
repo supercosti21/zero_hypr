@@ -1,0 +1,249 @@
+/* ==========================================================================
+   swaync — centro notifiche.
+
+   QUI NON CI SONO COLORI: arrivano da colori.css, che matugen rigenera dallo
+   sfondo ad ogni SUPER+W. Stessi nomi semantici della barra (@sfondo,
+   @accento, @testo…), quindi barra e notifiche restano intonate per
+   costruzione, non per coincidenza.
+
+   swaync e' GTK4. I selettori qui sotto non sono inventati: sono quelli del
+   foglio di stile ufficiale (/etc/xdg/swaync/style.css). Se una regola non ha
+   effetto, e' quasi sempre perche' la gerarchia va ripetita per intero — GTK
+   non applica un selettore breve a un nodo annidato.
+   ========================================================================== */
+
+@import url("colori.css");
+
+/* --------------------------------------------------------------- fondamenta */
+* {
+    font-family: "MesloLGS Nerd Font", "Noto Sans", sans-serif;
+    font-size: 13px;
+}
+
+/* La finestra che ospita le notifiche a comparsa deve restare trasparente:
+   il fondo lo mettono le singole notifiche, non il contenitore. Senza questo
+   si vede un rettangolo grigio attorno ad ognuna. */
+.notification-row,
+.floating-notifications,
+.floating-notifications.background,
+.blank-window {
+    background: transparent;
+}
+
+/* ------------------------------------------------ notifiche a comparsa e in lista */
+.notification-row .notification-background .notification {
+    background: alpha(@sfondo, 0.94);
+    border: 1px solid alpha(@contorno, 0.30);
+    border-radius: 16px;
+    margin: 6px 12px;
+    padding: 0;
+    color: @testo;
+}
+
+/* Il livello di urgenza si legge da una barra di colore a sinistra invece che
+   da un fondo colorato: resta leggibile e non urla. */
+.notification-row .notification-background .notification.critical {
+    border-left: 3px solid @urgente;
+}
+
+.notification-row .notification-background .notification.normal {
+    border-left: 3px solid @accento;
+}
+
+.notification-row .notification-background .notification.low {
+    border-left: 3px solid alpha(@contorno, 0.6);
+}
+
+.notification-row .notification-background .notification .notification-default-action {
+    padding: 12px;
+    border-radius: 16px;
+    background: transparent;
+}
+
+.notification-row .notification-background .notification .notification-default-action:hover {
+    background: alpha(@testo, 0.06);
+}
+
+/* --------------------------------------------------------------------- testo */
+.notification-row .notification-background .notification
+  .notification-default-action .notification-content .text-box .summary {
+    color: @testo;
+    font-weight: 600;
+    font-size: 13.5px;
+}
+
+.notification-row .notification-background .notification
+  .notification-default-action .notification-content .text-box .body {
+    color: @testo_tenue;
+    font-size: 12.5px;
+}
+
+/* L'orario e' informazione di servizio: piu' piccolo e smorzato. */
+.notification-row .notification-background .notification
+  .notification-default-action .notification-content .text-box .time {
+    color: alpha(@testo_tenue, 0.7);
+    font-size: 11.5px;
+}
+
+.notification-row .notification-background .notification
+  .notification-default-action .notification-content .image,
+.notification-row .notification-background .notification
+  .notification-default-action .notification-content .app-icon {
+    border-radius: 10px;
+    margin-right: 10px;
+}
+
+/* ------------------------------------------------------------------- pulsanti */
+.close-button {
+    background: transparent;
+    color: @testo_tenue;
+    border-radius: 50%;
+    margin: 6px;
+    padding: 2px;
+    min-width: 22px;
+    min-height: 22px;
+}
+
+.close-button:hover {
+    background: @urgente;
+    color: @su_urgente;
+}
+
+.notification-action > button,
+.notification-row .notification-background .notification .notification-action > button {
+    background: alpha(@testo, 0.08);
+    color: @testo;
+    border: none;
+    border-radius: 10px;
+    margin: 4px;
+    padding: 6px 12px;
+}
+
+.notification-action > button:hover,
+.notification-row .notification-background .notification .notification-action > button:hover {
+    background: @accento;
+    color: @su_accento;
+}
+
+/* ------------------------------------------------------------- centro notifiche */
+.control-center {
+    background: alpha(@sfondo, 0.90);
+    border: 1px solid alpha(@contorno, 0.35);
+    border-radius: 20px;
+    padding: 10px;
+    color: @testo;
+}
+
+.control-center .control-center-list {
+    background: transparent;
+}
+
+/* Il messaggio "Nessuna notifica": presente ma discreto. */
+.control-center .control-center-list-placeholder {
+    color: alpha(@testo_tenue, 0.5);
+    font-size: 14px;
+}
+
+/* Nel pannello le notifiche sono opache: non c'e' nulla da far trasparire,
+   stanno gia' sopra il fondo del centro. */
+.control-center .control-center-list .notification {
+    background: @sfondo_alt;
+}
+
+/* --------------------------------------------------------------------- widget */
+.widget-title {
+    color: @testo;
+    margin: 4px 8px 10px 8px;
+}
+
+.widget-title > label {
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* "Svuota": neutro a riposo. Un pulsante distruttivo non deve essere
+   invitante, ma deve diventare inequivocabile sotto il puntatore. */
+.widget-title > button {
+    background: alpha(@testo, 0.08);
+    color: @testo_tenue;
+    border: none;
+    border-radius: 10px;
+    padding: 4px 12px;
+    font-size: 12px;
+}
+
+.widget-title > button:hover {
+    background: @urgente;
+    color: @su_urgente;
+}
+
+.widget-dnd {
+    color: @testo;
+    margin: 4px 8px 10px 8px;
+}
+
+.widget-dnd label {
+    font-size: 13px;
+    color: @testo_tenue;
+}
+
+.widget-dnd switch {
+    background: alpha(@testo, 0.12);
+    border-radius: 14px;
+    border: none;
+}
+
+.widget-dnd switch:checked {
+    background: @accento;
+}
+
+.widget-dnd switch slider {
+    background: @sfondo;
+    border-radius: 50%;
+    min-width: 18px;
+    min-height: 18px;
+}
+
+/* ----------------------------------------------------------------- player mpris */
+.widget-mpris {
+    color: @testo;
+    margin: 4px 4px 10px 4px;
+}
+
+.widget-mpris .widget-mpris-player {
+    background: @sfondo_alt;
+    border-radius: 16px;
+    padding: 10px;
+    margin: 4px;
+}
+
+.widget-mpris .widget-mpris-player .widget-mpris-title {
+    color: @testo;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.widget-mpris .widget-mpris-player .widget-mpris-subtitle {
+    color: @testo_tenue;
+    font-size: 11.5px;
+}
+
+.widget-mpris .widget-mpris-player .widget-mpris-album-art {
+    border-radius: 12px;
+}
+
+.widget-mpris > box > button {
+    background: transparent;
+    color: @testo;
+    border: none;
+    border-radius: 50%;
+    padding: 4px;
+}
+
+.widget-mpris > box > button:hover {
+    background: alpha(@testo, 0.10);
+}
+
+.widget-mpris > box > button:disabled {
+    color: alpha(@testo_tenue, 0.35);
+}

@@ -48,9 +48,12 @@
 ## Notifiche
 | Tasti | Azione |
 |---|---|
-| `SUPER` + `N` | Non disturbare on/off |
-| `SUPER` + `Shift` + `N` | Chiudi tutte |
-| `SUPER` + `Ctrl` + `N` | Riapri l'ultima |
+| `SUPER` + `N` | Apri/chiudi il centro notifiche |
+| `SUPER` + `Shift` + `N` | Chiudi tutte le notifiche |
+| `SUPER` + `Ctrl` + `N` | Non disturbare on/off |
+
+Nel pannello ci sono lo storico, l'interruttore Non disturbare e i controlli del
+player se sta suonando qualcosa. Ci si arriva anche dalla campanella in barra.
 
 ## Tasti dedicati
 Volume, luminosità e tasti multimediali funzionano già. Chiudendo il coperchio

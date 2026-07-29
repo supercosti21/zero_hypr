@@ -87,6 +87,27 @@ che fa un reload — faceva sparire il workspace in coda finché non si apriva u
 finestra. Dichiararli nel file li rende immuni, perché il config viene
 riapplicato ad ogni ricarica. Meno codice e un bug in meno.
 
+### Notifiche
+
+`swaync` fa sia le notifiche a comparsa sia il **pannello** con lo storico
+(`SUPER`+`N` o la campanella in barra): dentro ci sono le notifiche passate,
+l'interruttore Non disturbare e i controlli del player.
+
+I colori vengono da `colori.css`, lo stesso meccanismo della barra e con gli
+stessi nomi semantici — quindi barra e notifiche sono intonate per costruzione,
+non per coincidenza. L'urgenza si legge da una barra colorata a sinistra invece
+che da un fondo colorato: resta leggibile e non urla.
+
+`config.json` non ha commenti perche' il suo schema dichiara
+`additionalProperties: false`, quindi le chiavi `"//"` che molti usano come
+commento non sono valide. Le motivazioni stanno in
+[`config/swaync/NOTE.md`](config/swaync/NOTE.md).
+
+Il demone lo avvia `scripts/notifiche.sh`, non un `exec-once` secco: swaync e
+mako sono entrambi demoni di `org.freedesktop.Notifications` e si escludono a
+vicenda. Lo script prende swaync se c'e' e ripiega su mako, cosi' non si resta
+mai senza notifiche per un pacchetto mancante.
+
 ### Colori dallo sfondo
 
 `matugen` estrae una palette Material You dallo sfondo e rigenera i file di
