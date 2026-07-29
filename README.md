@@ -102,6 +102,45 @@ CSS funziona con qualsiasi sfondo, chiaro o scuro.
 
 ---
 
+## Segreti e portachiavi
+
+`gnome-keyring` fa da Secret Service (`org.freedesktop.secrets`) per tutte le
+app: Brave, Trae, credenziali git, VPN. Non c'è un password manager separato,
+per scelta.
+
+**Sblocco al login.** `sistema/pam-gnome-keyring.sh` aggancia
+`pam_gnome_keyring` a `/etc/pam.d/system-login`, che è il punto dove convergono
+il login da tty e il greeter: un solo inserimento copre entrambi. Le righe sono
+`optional` di proposito — se il modulo si rompe il login funziona comunque, cosa
+che con `required` non sarebbe vera.
+
+```bash
+sudo ./sistema/pam-gnome-keyring.sh --prova    # mostra il risultato
+sudo ./sistema/pam-gnome-keyring.sh            # applica (backup automatico)
+sudo ./sistema/pam-gnome-keyring.sh --annulla  # torna indietro
+```
+
+Senza questo il portachiavi non viene sbloccato da nessuno, e il sintomo non è
+un errore ma il contrario: viene creato con **password vuota**, quindi tutto
+funziona… con i segreti cifrati da una chiave derivata dal nulla. È lo stato in
+cui si trovava questa macchina.
+
+**Le app Electron non trovano il portachiavi da sole.** Chromium sceglie il
+backend guardando `XDG_CURRENT_DESKTOP`: `Hyprland` non è nella lista che
+conosce, quindi ripiega sul negozio "basic" (un file con chiave fissa) e mostra
+messaggi tipo *"An OS keyring couldn't be identified"*. Il portachiavi funziona
+benissimo — semplicemente non viene cercato. Si corregge per applicazione:
+
+* Trae (fork di VSCode): `config/Trae/argv.json` con
+  `"password-store": "gnome-libsecret"`.
+* App Chromium avviate a mano: `--password-store=gnome-libsecret`.
+
+Mettere `GNOME` in `XDG_CURRENT_DESKTOP` risolverebbe in un colpo, ma quella
+variabile decide anche quali portali xdg vengono usati e quali autostart
+partono: si sistemerebbe il portachiavi rompendo i dialoghi Apri/Salva.
+
+---
+
 ## Trappole già pagate
 
 Roba che non sta nella documentazione e che è costata tempo. È qui per non

@@ -21,6 +21,13 @@ PROVA=0
 # Cartelle che vengono collegate a ~/.config/<nome>
 CARTELLE=(hypr waybar fuzzel mako swaync matugen alacritty xdg-desktop-portal)
 
+# Singoli file, per le app la cui cartella di config e' piena di stato che non
+# ha senso versionare (cache, estensioni, cronologie). Si collega solo il file
+# che conta. Formato: percorso/nel/repo|percorso/sotto/.config
+FILE=(
+    "config/Trae/argv.json|Trae/argv.json"
+)
+
 azzurro() { printf '\033[36m%s\033[0m\n' "$1"; }
 giallo()  { printf '\033[33m%s\033[0m\n' "$1"; }
 verde()   { printf '\033[32m%s\033[0m\n' "$1"; }
@@ -64,6 +71,30 @@ for nome in "${CARTELLE[@]}"; do
 
     azzurro "collego  $nome"
     fai mkdir -p "$DEST"
+    fai ln -s "$sorgente" "$bersaglio"
+done
+
+# ------------------------------------------------------------ 1b. file singoli
+for voce in "${FILE[@]}"; do
+    sorgente="$REPO/${voce%%|*}"
+    bersaglio="$DEST/${voce##*|}"
+    nome="${voce##*|}"
+
+    [ -f "$sorgente" ] || continue
+
+    if [ -L "$bersaglio" ] && [ "$(readlink -f "$bersaglio")" = "$(readlink -f "$sorgente")" ]; then
+        verde "ok       $nome (symlink gia' corretto)"
+        continue
+    fi
+
+    if [ -e "$bersaglio" ] || [ -L "$bersaglio" ]; then
+        giallo "salvo    $nome -> $(basename "$bersaglio").pre-git"
+        fai mv "$bersaglio" "$bersaglio.pre-git"
+    fi
+
+    azzurro "collego  $nome"
+    # La cartella dell'app puo' non esistere ancora su una macchina nuova.
+    fai mkdir -p "$(dirname "$bersaglio")"
     fai ln -s "$sorgente" "$bersaglio"
 done
 

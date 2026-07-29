@@ -1,0 +1,27 @@
+// ============================================================================
+//  Argomenti di avvio di Trae (fork di VSCode: legge questo file come Code).
+//
+//  PERCHE' ESISTE
+//  Trae si lamentava: "An OS keyring couldn't be identified for storing the
+//  encryption related data". Il messaggio e' fuorviante: il portachiavi c'e' e
+//  funziona (gnome-keyring-daemon espone org.freedesktop.secrets sul bus, e
+//  `secret-tool store/lookup` va a buon fine).
+//
+//  Il vero motivo e' che Electron/Chromium sceglie il backend delle password
+//  guardando XDG_CURRENT_DESKTOP. Qui vale "Hyprland", che non e' nella lista
+//  che conosce (GNOME, KDE, XFCE...), quindi ripiega sul negozio "basic" —
+//  cioe' un file cifrato con una chiave fissa, che e' la "weaker encryption"
+//  proposta dal pulsante nel dialogo.
+//
+//  Indicandogli il backend a mano, usa il portachiavi vero.
+//
+//  ALTERNATIVA SCARTATA: mettere GNOME in XDG_CURRENT_DESKTOP. Funziona, ma
+//  quella variabile decide anche quali portali xdg vengono usati e quali
+//  autostart partono: si sistemava il portachiavi rompendo i dialoghi
+//  Apri/Salva. Meglio una riga per l'applicazione che la sbaglia.
+// ============================================================================
+{
+  // gnome-libsecret = parla con org.freedesktop.secrets via libsecret.
+  // Nonostante il nome non richiede GNOME: e' solo il protocollo standard.
+  "password-store": "gnome-libsecret"
+}
