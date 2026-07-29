@@ -29,3 +29,6 @@ config/fuzzel/colori.ini
 # Cache di Python accanto agli script
 __pycache__/
 *.pyc
+
+# Stato locale di Claude Code (permessi di questa macchina)
+.claude/settings.local.json
