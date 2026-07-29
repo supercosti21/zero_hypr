@@ -60,7 +60,7 @@ sfuggita; tutto il resto è nel tooltip o dietro un click.
 
 | dove | cosa |
 |---|---|
-| sinistra | numero dei workspace (dinamici) |
+| sinistra | numero dei workspace (cinque, fissi) |
 | centro | titolo della finestra col focus |
 | destra | wi-fi · bluetooth · batteria · data e ora · notifiche · spegni |
 
