@@ -30,8 +30,8 @@
 ## Workspace
 | Tasti | Azione |
 |---|---|
-| `SUPER` + `1`…`0` | Vai al workspace |
-| `SUPER` + `Shift` + `1`…`0` | Sposta la finestra lì |
+| `SUPER` + `1`…`5` | Vai al workspace (cinque, fissi) |
+| `SUPER` + `Shift` + `1`…`5` | Sposta la finestra lì |
 | `SUPER` + `Tab` | Torna al workspace precedente |
 | `SUPER` + rotella | Scorri i workspace |
 | `SUPER` + `S` | Scratchpad (terminale a scomparsa) |

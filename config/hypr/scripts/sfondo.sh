@@ -120,8 +120,25 @@ PY
 # fallisce con "a terminal was not detected". Con --prefer sceglie da se'.
 # "saturation" = il piu' saturo fra i candidati: da' accenti vivi invece di
 # grigi slavati.
-if command -v matugen >/dev/null; then
-    if matugen --quiet --prefer saturation image "$img" 2>/dev/null; then
+# Trovare matugen non e' banale e qui si nasconde un bug che e' costato tempo:
+# le scorciatoie di Hyprland NON passano da una shell interattiva, quindi il
+# loro PATH e' solo quello del compositore — /usr/bin e compagnia, senza
+# ~/.local/bin (che lo aggiunge il profilo della shell). Risultato: da terminale
+# funzionava, da SUPER+W cambiava lo sfondo e non i colori, senza dire niente.
+# Quindi: si cerca nel PATH e poi nei posti noti, a mano.
+MATUGEN=""
+for candidato in matugen "$HOME/.local/bin/matugen" /usr/bin/matugen; do
+    if percorso=$(command -v "$candidato" 2>/dev/null); then
+        MATUGEN="$percorso"
+        break
+    fi
+done
+
+if [ -z "$MATUGEN" ]; then
+    # Silenzio no: se la palette non si rigenera si deve sapere perche'.
+    avvisa "Sfondo cambiato. matugen non trovato: i colori restano quelli di prima."
+else
+    if "$MATUGEN" --quiet --prefer saturation image "$img" 2>/dev/null; then
 
         # Ognuno si ricarica a modo suo. Nessuno di questi riavvia il
         # programma: sono ricariche a caldo, non si perde nulla.

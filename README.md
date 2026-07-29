@@ -74,17 +74,18 @@ vedevano doppie. Il compito utile di `nm-applet` (chiedere la password wi-fi)
 è passato a `config/hypr/scripts/wifi.sh`, che la chiede in fuzzel — mascherata —
 e la passa a `nmcli`.
 
-### Workspace dinamici
+### Workspace
 
-Stile COSMIC: esistono i workspace occupati **più uno vuoto in coda**, minimo
-due. Riempi il 2 → appare il 3. Svuoti il 3 → sparisce. Non si gestiscono mai a
-mano.
+Cinque, fissi, sempre presenti (`persistent:true` in `hyprland.conf`). La barra
+mostra sempre `1 2 3 4 5` e le posizioni non ballano: `SUPER`+`3` porta sempre
+nello stesso posto.
 
-Lo fa `config/hypr/scripts/workspace-dinamici.py`: ascolta gli eventi sul socket
-di Hyprland e ricalcola quali workspace devono essere `persistent`. Non lancia
-`hyprctl` (ogni chiamata è un fork+exec) e non fa polling: dorme sulla socket e
-si sveglia solo sugli eventi che possono cambiare il conteggio. A regime, zero
-CPU.
+C'era una prima versione con workspace dinamici in stile COSMIC (occupati + uno
+vuoto in coda), gestiti da un demone sul socket di Hyprland. Funzionava, ma
+`hyprctl reload` **azzera i keyword impostati a runtime**: ogni cambio sfondo —
+che fa un reload — faceva sparire il workspace in coda finché non si apriva una
+finestra. Dichiararli nel file li rende immuni, perché il config viene
+riapplicato ad ogni ricarica. Meno codice e un bug in meno.
 
 ### Colori dallo sfondo
 
