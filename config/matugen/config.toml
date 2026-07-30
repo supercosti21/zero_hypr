@@ -23,8 +23,8 @@ output_path = '~/.config/waybar/colori.css'
 
 # ------------------------------------------------------- bordi finestre e ombra
 [templates.hyprland]
-input_path  = '~/.config/matugen/templates/hypr-colori.conf'
-output_path = '~/.config/hypr/colori.conf'
+input_path  = '~/.config/matugen/templates/hypr-colori.lua'
+output_path = '~/.config/hypr/colori.lua'
 
 # --------------------------------------------------------------------- launcher
 [templates.fuzzel]

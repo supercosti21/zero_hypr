@@ -114,7 +114,7 @@ mai senza notifiche per un pacchetto mancante.
 colore di barra, notifiche, launcher, bordi finestre e terminale. Succede ad
 ogni `SUPER`+`W`.
 
-I file rigenerati (`colori.css`, `colori.conf`, …) sono in `.gitignore`:
+I file rigenerati (`colori.css`, `colori.lua`, …) sono in `.gitignore`:
 cambierebbero ad ogni cambio sfondo e riempirebbero la storia di rumore. In repo
 stanno i `*.default.*`, che `installa.sh` copia come punto di partenza.
 

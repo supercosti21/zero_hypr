@@ -112,7 +112,7 @@ while IFS='|' read -r seme generato; do
     fi
 done <<'SEMI'
 config/waybar/colori.default.css|config/waybar/colori.css
-config/hypr/colori.default.conf|config/hypr/colori.conf
+config/hypr/colori.default.lua|config/hypr/colori.lua
 config/swaync/colori.default.css|config/swaync/colori.css
 config/alacritty/colori.default.toml|config/alacritty/colori.toml
 config/fuzzel/colori.default.ini|config/fuzzel/colori.ini

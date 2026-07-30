@@ -5,7 +5,7 @@
 # e riempirebbero la storia di commit inutili. In repo stanno i corrispondenti
 # *.default.*, che installa.sh copia al primo avvio come punto di partenza.
 config/waybar/colori.css
-config/hypr/colori.conf
+config/hypr/colori.lua
 config/swaync/colori.css
 config/alacritty/colori.toml
 config/fuzzel/colori.ini
