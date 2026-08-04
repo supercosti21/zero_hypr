@@ -391,6 +391,19 @@ hl.bind(mod .. " + mouse:273", hl.dsp.window.resize())
 hl.bind("Print",         hl.dsp.exec_cmd("hyprshot -m region --clipboard-only"))
 hl.bind("SHIFT + Print", hl.dsp.exec_cmd("hyprshot -m output -o " .. home .. "/Pictures"))
 hl.bind("CTRL + Print",  hl.dsp.exec_cmd("hyprshot -m window -o " .. home .. "/Pictures"))
+
+-- Cattura e annota: SUPER+Stamp seleziona un'area e la apre in satty, dove si
+-- puo' disegnare, evidenziare, scrivere e sfocare le parti da nascondere.
+-- I tre tasti qui sopra restano quelli di prima: chi vuole solo copiare
+-- un'area continua a premere Stamp e basta, senza passare da un editor.
+--
+-- --raw manda il PNG sullo standard output invece di salvarlo, e satty lo legge
+-- con --filename -: cosi' non resta in giro un file intermedio se poi decidi di
+-- annullare. --early-exit chiude satty appena hai copiato.
+hl.bind(mod .. " + Print", hl.dsp.exec_cmd(
+    "bash -c \"hyprshot -m region --raw | satty --filename - " ..
+    "--copy-command wl-copy --early-exit " ..
+    "--output-filename " .. home .. "/Pictures/satty-$(date +%Y%m%d-%H%M%S).png\""))
 -- Contagocce: copia il colore sotto il puntatore in esadecimale.
 hl.bind(mod .. " + SHIFT + P", hl.dsp.exec_cmd("hyprpicker -a"))
 

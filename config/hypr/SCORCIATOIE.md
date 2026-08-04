@@ -43,6 +43,11 @@
 | `Stamp` | Area selezionata → appunti |
 | `Shift` + `Stamp` | Schermo intero → `~/Pictures` |
 | `Ctrl` + `Stamp` | Finestra → `~/Pictures` |
+| `SUPER` + `Stamp` | Area selezionata → **satty**, per annotarla |
+
+Con `SUPER` + `Stamp` la selezione si apre in satty: frecce, evidenziatore,
+testo, numeri progressivi e sfocatura per nascondere quello che non deve
+uscire. Alla fine l'immagine finisce negli appunti *e* in `~/Pictures`.
 | `SUPER` + `Shift` + `P` | Contagocce colore |
 
 ## Notifiche
