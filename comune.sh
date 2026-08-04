@@ -58,7 +58,13 @@ elenco() {
 # --- guardie ------------------------------------------------------------------
 # Gli script di sistema/ girano come root e non devono MAI scrivere in una home:
 # un file di root dentro ~/.config rompe matugen in silenzio.
+#
+# In --prova non serve root, e pretenderlo sarebbe controproducente: il dry-run
+# non scrive niente, e chiedere una password per vedere in anteprima cosa
+# succederebbe significa che quasi nessuno guardera' l'anteprima. Va chiamata
+# DOPO aver impostato PROVA.
 serve_root() {
+    [ "${PROVA:-0}" = 1 ] && return 0
     [ "$(id -u)" = "0" ] || {
         errore "Serve root: sudo $0 $*"
         exit 1

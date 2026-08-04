@@ -31,7 +31,14 @@ FILE=/etc/pam.d/system-login
 MODULO=/usr/lib/security/pam_gnome_keyring.so
 AZIONE="${1:-applica}"
 
-[ "$(id -u)" = "0" ] || { echo "Serve root: sudo $0 $AZIONE" >&2; exit 1; }
+# --prova non scrive niente, quindi non serve root. Pretenderlo vorrebbe dire
+# che per vedere l'anteprima di una modifica a un file PAM devi gia' aver dato
+# la password — cioe' che quasi nessuno la guarderebbe, che e' l'opposto di
+# quello che serve proprio qui: su un file PAM si sbaglia una volta sola.
+if [ "$AZIONE" != "--prova" ] && [ "$(id -u)" != "0" ]; then
+    echo "Serve root: sudo $0 $AZIONE" >&2
+    exit 1
+fi
 
 # --- annulla -----------------------------------------------------------------
 if [ "$AZIONE" = "--annulla" ]; then
