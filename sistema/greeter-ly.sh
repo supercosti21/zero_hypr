@@ -61,8 +61,12 @@ dm_attuale() {
 # Elenca ogni ly@<qualcosa> abilitato. Serve perche' il modello puo' essere
 # abilitato su piu' terminali insieme senza che nessun comando se ne lamenti.
 ly_abilitati() {
-    ls -1 /etc/systemd/system/multi-user.target.wants/ 2>/dev/null \
-        | grep '^ly@' || true
+    local f
+    for f in /etc/systemd/system/multi-user.target.wants/ly@*.service; do
+        # Il glob senza corrispondenze resta letterale: si scarta cosi'.
+        [ -e "$f" ] || continue
+        basename "$f"
+    done
 }
 
 stato() {

@@ -1,0 +1,60 @@
+# Containerfile — prova quello che serve pacman, senza una macchina Arch.
+#
+#   podman build -f prova/Containerfile -t zero-hypr-prova .
+#   podman run --rm zero-hypr-prova
+#
+# (docker va uguale: sostituisci podman con docker)
+#
+# COSA PROVA, e perche' vale la pena
+# Che ogni nome in pacchetti/base.txt e pacchetti/nvidia.txt esista davvero nei
+# repo ufficiali. E' il controllo di maggior valore dell'intero repo: i nomi dei
+# pacchetti cambiano — vengono rinominati, divisi, assorbiti in altri — e il
+# sintomo di un nome sbagliato arriva mesi dopo, sul portatile, a meta'
+# installazione. Qui costa due minuti.
+#
+# Prova anche a risolvere la transazione completa (senza scaricare niente), che
+# intercetta i conflitti fra pacchetti: due nomi giusti presi singolarmente
+# possono essere incompatibili fra loro.
+#
+# COSA NON PUO' PROVARE, e va detto invece di lasciarlo credere:
+#   · la compilazione dei moduli dkms — serve il kernel vero e i suoi headers;
+#   · chwd — legge il bus PCI;
+#   · l'abilitazione di ly@tty1 e la disattivazione del display manager — serve
+#     un systemd come PID 1, che in un container non c'e';
+#   · la sessione Hyprland e come si vede il desktop.
+#
+# In breve: il container prova i NOMI e la disposizione dei file, una macchina
+# virtuale prova l'avvio e la sessione, solo il portatile prova NVIDIA e
+# batteria.
+
+# L'immagine ufficiale di CachyOS ha i suoi repo gia' configurati sopra quelli
+# di Arch, che e' esattamente la situazione della macchina vera.
+FROM docker.io/cachyos/cachyos:latest
+
+# Gli strumenti dei controlli statici. --needed cosi' l'immagine si ricostruisce
+# in fretta quando cambia solo il repo.
+RUN pacman -Syu --noconfirm --needed \
+        bash python lua shellcheck systemd jq coreutils \
+    && pacman -Scc --noconfirm
+
+WORKDIR /repo
+COPY . /repo
+
+# Un utente non privilegiato: installa.sh si rifiuta di girare come root, ed e'
+# giusto che la prova rispetti la stessa regola invece di aggirarla.
+RUN useradd -m -G wheel prova && chown -R prova:prova /repo
+USER prova
+
+CMD ["bash", "-c", "\
+    set -e; \
+    echo '════ controlli statici ════'; \
+    ./prova/statici.sh; \
+    echo; \
+    echo '════ i nomi dei pacchetti esistono? ════'; \
+    ./prova/pacchetti.sh; \
+    echo; \
+    echo '════ collegamenti in una home finta ════'; \
+    ./installa.sh --prova >/dev/null && echo '  ok      la prova a secco gira'; \
+    ./installa.sh >/dev/null && echo '  ok      i collegamenti si creano'; \
+    ./verifica.sh --breve || true; \
+"]

@@ -1,3 +1,8 @@
+# shellcheck shell=bash
+# Niente shebang: questo file si include con `source`, non si esegue, e un
+# shebang farebbe credere il contrario. La riga qui sopra dice a shellcheck
+# quale shell assumere, dato che non puo' dedurlo da solo.
+#
 # comune.sh — funzioni condivise. Si include con `source`, non si lancia.
 #
 # Le tiene insieme perche' installa-tutto.sh, verifica.sh e gli script di

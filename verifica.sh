@@ -173,9 +173,14 @@ if command -v systemctl >/dev/null 2>&1; then
     if systemctl is-enabled --quiet ly@tty1.service 2>/dev/null; then ok "ly@tty1"
     else ko "ly@tty1" "lancia sudo ./sistema/greeter-ly.sh"; fi
 
-    altri=$(ls -1 /etc/systemd/system/multi-user.target.wants/ 2>/dev/null \
-            | grep '^ly@' | grep -v '^ly@tty1.service$' || true)
-    [ -n "$altri" ] && ko "un solo ly@" "abilitati anche: $altri" || ok "un solo ly@"
+    altri=""
+    for u in /etc/systemd/system/multi-user.target.wants/ly@*.service; do
+        # Il glob senza corrispondenze resta letterale: si scarta cosi'.
+        [ -e "$u" ] || continue
+        n="$(basename "$u")"
+        [ "$n" = "ly@tty1.service" ] || altri="$altri $n"
+    done
+    [ -n "$altri" ] && ko "un solo ly@" "abilitati anche:$altri" || ok "un solo ly@"
 
     dm=/etc/systemd/system/display-manager.service
     if [ -L "$dm" ]; then

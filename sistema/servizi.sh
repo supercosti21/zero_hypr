@@ -28,6 +28,7 @@ REPO="$(dirname "$QUI")"
 source "$REPO/comune.sh"
 
 AZIONE="${1:-applica}"
+# shellcheck disable=SC2034  # la legge fai(), che sta in comune.sh
 [ "$AZIONE" = "--prova" ] && PROVA=1
 
 serve_root "$AZIONE"
