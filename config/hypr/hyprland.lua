@@ -305,7 +305,14 @@ local menu = "fuzzel"
 hl.bind(mod .. " + Return", hl.dsp.exec_cmd(term))
 hl.bind(mod .. " + Q",      hl.dsp.window.close())
 hl.bind(mod .. " + E",      hl.dsp.exec_cmd(file))
-hl.bind(mod .. " + R",      hl.dsp.exec_cmd(menu))
+-- SUPER+R apre la palette: applicazioni E azioni di sistema nella stessa
+-- finestra, piu' i prefissi (> comando, $ comando in terminale, = calcolo,
+-- "g testo" per cercare). Vedi scripts/menu.sh.
+hl.bind(mod .. " + R",      hl.dsp.exec_cmd(scripts .. "/menu.sh"))
+-- SUPER+D resta fuzzel puro, il launcher nativo. Non passa da menu.sh e non
+-- dipende da niente di nuovo: se un giorno la palette si rompe, il modo di
+-- aprire un programma c'e' ancora. Su un tasto che si preme cento volte al
+-- giorno, avere una via di scorta non e' pignoleria.
 hl.bind(mod .. " + D",      hl.dsp.exec_cmd(menu))
 hl.bind(mod .. " + Escape", hl.dsp.exec_cmd("hyprlock"))
 hl.bind(mod .. " + SHIFT + E", hl.dsp.exit())
@@ -320,8 +327,7 @@ hl.bind(mod .. " + SHIFT + N", hl.dsp.exec_cmd("swaync-client -C -sw"))
 hl.bind(mod .. " + CTRL + N",  hl.dsp.exec_cmd("swaync-client -d -sw"))
 
 -- Storico appunti: SUPER+V apre la cronologia in fuzzel e reincolla.
-hl.bind(mod .. " + V", hl.dsp.exec_cmd(
-    "cliphist list | fuzzel --dmenu --prompt='appunti> ' | cliphist decode | wl-copy"))
+hl.bind(mod .. " + V", hl.dsp.exec_cmd(scripts .. "/appunti.sh"))
 
 -- --- Sfondo ---
 -- SUPER+W: selettore delle immagini in ~/Git/wallpapers. Applica subito e

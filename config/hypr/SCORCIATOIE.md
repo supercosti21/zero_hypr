@@ -6,14 +6,41 @@
 | Tasti | Azione |
 |---|---|
 | `SUPER` + `Invio` | Terminale (Alacritty) |
-| `SUPER` + `R` / `D` | Launcher applicazioni |
+| `SUPER` + `R` | **Palette**: applicazioni, sistema, ricerche, comandi |
+| `SUPER` + `D` | Launcher applicazioni, fuzzel puro |
 | `SUPER` + `E` | Gestore file (Thunar) |
 | `SUPER` + `Q` | Chiudi finestra |
 | `SUPER` + `V` | Storico appunti |
-| `SUPER` + `W` | Cambia sfondo (immagini in `~/Git/wallpapers`) |
+| `SUPER` + `W` | Cambia sfondo (immagini in `~/Git/wallpapers`, o quella in `sfondi/`) |
 | `SUPER` + `Esc` | Blocca schermo |
 | `SUPER` + `Shift` + `Q` | Menu spegnimento |
 | `SUPER` + `Shift` + `E` | Esci da Hyprland |
+
+## La palette — `SUPER` + `R`
+
+Una finestra sola con dentro le applicazioni **e** le azioni di sistema. Per
+aprire un programma si scrivono due lettere e Invio, come sempre. Scrivendo
+invece uno di questi prefissi succede altro:
+
+| Si scrive | Cosa fa |
+|---|---|
+| `> comando` | Esegue il comando |
+| `$ comando` | Lo esegue dentro un terminale, che resta aperto sull'output |
+| `= 2+2*3` | Calcola e copia il risultato negli appunti |
+| `g testo` | Cerca su Google |
+| `w testo` | Cerca su Wikipedia |
+| `y testo` | Cerca su YouTube |
+| `arch testo` | Cerca sulla wiki di Arch |
+
+Il calcolo conosce le funzioni di `math`: `sqrt(144)`, `2**10`, `pi*2`, `sin(0)`.
+
+Le nove voci di sistema, in fondo all'elenco: **Rete** (le stesse reti wi-fi
+della barra), **Bluetooth**, **Audio** (quale uscita usare), **Finestre** (salta
+a una finestra aperta, ovunque sia), **Sfondo**, **Appunti**, **Emoji** (cerca
+per nome e copia), **Impostazioni**, **Spegnimento**.
+
+Se qualcosa nella palette non funzionasse, `SUPER` + `D` è il launcher di fuzzel
+puro e non passa da nessuno script: le applicazioni si aprono comunque.
 
 ## Muoversi fra le finestre
 | Tasti | Azione |
