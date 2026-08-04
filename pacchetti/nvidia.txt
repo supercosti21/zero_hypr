@@ -1,0 +1,22 @@
+# =============================================================================
+#  Driver per la RTX 4060 Max-Q (Ada).
+#
+#  NON viene installato da sistema/pacchetti.sh. Lo usa sistema/gpu-nvidia.sh,
+#  e solo se: (a) c'e' davvero una NVIDIA sul bus PCI, e (b) chwd non ha gia'
+#  fatto il lavoro durante l'installazione di CachyOS — che e' il caso normale.
+#
+#  Perche' i moduli "open": da Turing in poi sono quelli raccomandati da NVIDIA,
+#  e la 4060 e' Ada. Perche' dkms e non i moduli precompilati
+#  (linux-cachyos-nvidia-open): quelli ti legano a quel preciso pacchetto
+#  kernel, e il giorno che passi a linux-cachyos-lts resti senza moduli senza
+#  che nessuno te lo dica. Con dkms basta avere gli headers, e gpu-nvidia.sh
+#  li ricava dai kernel installati invece di scriverli a mano.
+# =============================================================================
+
+nvidia-open-dkms
+nvidia-utils
+# prime-run, per mandare un singolo programma sulla scheda discreta.
+nvidia-prime
+egl-wayland
+# Decodifica video in hardware anche sulla discreta.
+libva-nvidia-driver

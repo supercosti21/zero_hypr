@@ -1,0 +1,143 @@
+# =============================================================================
+#  Pacchetti dell'ambiente.
+#
+#  TUTTI dai repo ufficiali: niente AUR, mai. CachyOS impila i propri repo
+#  SOPRA core/extra/multilib di Arch, che restano attivi, quindi `pacman -S`
+#  risolve sull'unione dei due — non serve abilitare niente.
+#
+#  Formato: un pacchetto per riga. Righe vuote e righe con # ignorate.
+#  Lo legge sistema/pacchetti.sh, che prima di installare controlla ogni nome
+#  con `pacman -Si` e dice quali mancano, invece di far abortire l'intera
+#  transazione per un nome sbagliato.
+#
+#  Questa e' la fonte di verita' unica: il README rimanda qui e non duplica
+#  l'elenco.
+# =============================================================================
+
+# --- compositore e sessione ---------------------------------------------------
+hyprland
+hyprpaper
+hyprlock
+hypridle
+hyprpolkitagent
+hyprshot
+hyprpicker
+polkit
+xdg-desktop-portal-hyprland
+xdg-desktop-portal-gtk
+# Le app Qt sotto Wayland: senza, ripiegano su XWayland e si vedono sfocate su
+# schermi con scala diversa da 1.
+qt5-wayland
+qt6-wayland
+
+# --- barra, launcher, notifiche, terminale ------------------------------------
+waybar
+fuzzel
+swaync
+alacritty
+
+# NIENTE mako. Vedi sistema/bonifica.sh: due demoni di
+# org.freedesktop.Notifications se lo contendono, e mako e' attivabile via dbus,
+# quindi non basta non avviarlo.
+
+# --- i colori dallo sfondo ----------------------------------------------------
+matugen
+# colori-terminale.py: sola libreria standard, nessun pip.
+python
+# sfondo.sh legge `hyprctl monitors -j`; menu.sh legge `hyprctl clients -j`.
+jq
+
+# --- tema GTK, cursore, font ---------------------------------------------------
+# gsettings-desktop-schemas e dconf NON sono facoltativi: senza di loro
+# tema-gtk.sh non trova gli schemi org.gnome.desktop.* e il tema non viene
+# applicato. gsettings da solo (glib2) non basta.
+gsettings-desktop-schemas
+dconf
+glib2
+adw-gtk-theme
+papirus-icon-theme
+# Il tema cursore "Adwaita" e il font "Adwaita Sans 11" impostati da tema-gtk.sh.
+adwaita-cursors
+adwaita-fonts
+# Interfaccia grafica per cambiare tema GTK: ha gia' una window rule.
+nwg-look
+# Il font della barra, del launcher e del terminale. Le icone della barra sono
+# glifi Nerd Font: senza questo si vedono rettangoli vuoti.
+ttf-meslo-nerd
+# Fallback di swaync/style.css, e le emoji del selettore in menu.sh.
+noto-fonts
+noto-fonts-emoji
+
+# --- audio ---------------------------------------------------------------------
+pipewire
+pipewire-pulse
+pipewire-alsa
+# wpctl, cioe' i tasti volume e il selettore uscite di menu.sh.
+wireplumber
+# Ha gia' una window rule in hyprland.lua.
+pavucontrol
+# I tasti multimediali (play/pausa, avanti, indietro) di hyprland.lua.
+playerctl
+
+# --- rete e bluetooth ----------------------------------------------------------
+networkmanager
+# Tasto destro sul modulo rete della barra; ha gia' una window rule.
+nm-connection-editor
+bluez
+# bluetoothctl: lo usa scripts/bluetooth.sh.
+bluez-utils
+# Click sul modulo bluetooth della barra; ha gia' una window rule.
+blueman
+
+# --- portachiavi ----------------------------------------------------------------
+# Secret Service per Brave, i tool di sviluppo, le credenziali git e le VPN.
+# Lo sblocco al login lo aggancia sistema/pam-gnome-keyring.sh.
+gnome-keyring
+libsecret
+
+# --- portatile: luminosita', energia, dischi -------------------------------------
+brightnessctl
+# Lo pilota /usr/local/bin/power-profile-auto, installato da sistema/udev.sh.
+# NIENTE tlp: litiga con power-profiles-daemon, che la regola udev presuppone.
+power-profiles-daemon
+upower
+udisks2
+udiskie
+# Cestino e montaggi per thunar.
+gvfs
+thunar
+thunar-volman
+# Crea ~/Pictures, che hyprshot da' per scontata.
+xdg-user-dirs
+# xdg-open: le ricerche web di menu.sh aprono cosi', quindi funzionano con
+# qualunque browser deciderai di installare — nessuno viene imposto qui.
+xdg-utils
+
+# --- appunti e schermate ----------------------------------------------------------
+wl-clipboard
+cliphist
+# Dipendenze di hyprshot: esplicite perche' se una sparisse il sintomo sarebbe
+# "il tasto Stamp non fa niente", che non porta da nessuna parte.
+grim
+slurp
+# Annotazione delle schermate su SUPER+Stamp. E' in extra, quindi niente AUR.
+satty
+# notify-send: lo usano sfondo.sh, wifi.sh, osd.sh, menu.sh e bluetooth.sh.
+libnotify
+
+# --- il selettore emoji di menu.sh -------------------------------------------------
+# Fornisce /usr/share/unicode/emoji/emoji-test.txt. Se manca, menu.sh nasconde
+# la voce invece di rompersi.
+unicode-emoji
+
+# --- grafica Intel -----------------------------------------------------------------
+# La iGPU compone il desktop: e' questa che deve andare bene, non la NVIDIA.
+vulkan-intel
+vulkan-icd-loader
+# Decodifica video in hardware sulla Iris Xe. Su un portatile e' batteria.
+intel-media-driver
+
+# --- schermata di accesso -----------------------------------------------------------
+# Lo installa anche sistema/greeter-ly.sh; qui c'e' per completezza
+# dell'inventario, cosi' verifica.sh sa che deve trovarlo.
+ly
