@@ -1,0 +1,15 @@
+PipeWire 'pipewire-0' [1.4.7, pol@nitro, cookie:7654321]
+ └─ Clients:
+        32. WirePlumber                         [1.4.7, pol@nitro, pid:1201]
+
+Audio
+ ├─ Devices:
+ │      54. Built-in Audio                      [alsa]
+ │  
+ ├─ Sinks:
+ │      56. Built-in Audio Analog Stereo        [vol: 0.65]
+ │  
+ ├─ Sources:
+ │  *   57. Built-in Audio Analog Stereo        [vol: 1.00]
+ │  
+ └─ Streams:

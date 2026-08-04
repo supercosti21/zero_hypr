@@ -1,0 +1,6 @@
+Audio
+ ├─ Sinks:
+ │      70. Scheda *speciale* USB               [vol: 1.00]
+ │  *   56. Built-in Audio Analog Stereo        [vol: 0.65]
+ │  
+ ├─ Sources:

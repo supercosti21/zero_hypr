@@ -432,6 +432,29 @@ nome che il firmware di *questo* Acer dà all'alimentatore; altrove è `AC`,
 `ADP0`, `ADP1`. Filtrare per `ENV{POWER_SUPPLY_TYPE}=="Mains"` costa uguale e
 funziona ovunque.
 
+**`wpctl status` marca l'uscita predefinita con un `*`, ma non da sola.** Il
+formato è un albero con caratteri di box, e l'asterisco sta **prima dell'id**:
+
+```
+ ├─ Sinks:
+ │  *   56. Built-in Audio Analog Stereo   [vol: 0.65]
+ │      70. Scheda *speciale* USB          [vol: 1.00]
+```
+
+Cercarlo con `$0 ~ /\*/` significa cercarlo in tutta la riga, quindi un
+dispositivo con un asterisco nel nome risulta anche lui quello attivo. Va
+cercato solo in `substr($0, 1, RSTART-1)`. E la sezione finisce al `├─`
+successivo: la riga di solo `│` che sembra chiuderla è spaziatura, non un
+delimitatore.
+
+**`powerprofilesctl list` è multi-riga**, con le chiavi di dettaglio rientrate
+sotto ogni profilo. Il criterio per distinguere un profilo da un dettaglio è la
+**posizione**, non il nome: filtrare per `[a-z-]+` regge solo finché le chiavi
+si chiamano `Driver` e `Degraded` con la maiuscola, e una chiave minuscola a
+monte farebbe comparire nel menù un profilo che non esiste. Da evitare anche
+l'elenco fisso dei profili ammessi: risolve il sintomo, ma se il demone ne
+aggiungesse uno lo farebbe sparire in silenzio, che è peggio.
+
 **hyprpaper 0.8 vuole un blocco, e falla in silenzio.** Le righe piatte
 `preload = img` + `wallpaper = eDP-1,img` non danno **nessun** errore ma vengono
 ignorate: nel log compare solo `Monitor eDP-1 has no target` e lo sfondo resta
@@ -546,6 +569,22 @@ controllare:
 - [`prova/menu.sh`](prova/menu.sh) — l'instradamento della palette e le trappole
   dei `.desktop`, con fuzzel e hyprctl finti. Include una prova che tenta di
   uscire dal recinto della calcolatrice.
+- [`prova/parser.sh`](prova/parser.sh) — i quattro punti che leggono l'output
+  testuale di altri programmi (`wpctl status`, `powerprofilesctl list`,
+  `bluetoothctl devices`, `hyprctl clients -j`), contro i campioni in
+  [`prova/campioni/`](prova/campioni/PROVENIENZA.md). È la categoria che sbaglia
+  nel modo più silenzioso: quando un formato non è quello atteso il risultato
+  non è un errore, è un menù vuoto o con dentro le voci sbagliate.
+
+I parser sono stati **separati** dai comandi che li alimentano proprio per
+questo: ognuno legge da stdin, quindi gli si può dare in pasto un file invece di
+aver bisogno del programma vero.
+
+Il limite va detto: i campioni sono riproduzioni fedeli al formato documentato,
+non catture da una macchina vera. Un campione sbagliato darebbe un test verde e
+un desktop rotto — in
+[`prova/campioni/PROVENIENZA.md`](prova/campioni/PROVENIENZA.md) c'è come
+rifarli dal vero, ed è la prima cosa da fare sul portatile.
 
 Per i nomi dei pacchetti serve `pacman`:
 

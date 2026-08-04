@@ -1,0 +1,12 @@
+  performance:
+    Driver:     platform_profile
+    Platform Profile:  performance
+    Degraded:   no
+
+* balanced:
+    Driver:     platform_profile
+    Platform Profile:  balanced
+
+  power-saver:
+    Driver:     platform_profile
+    Platform Profile:  low-power

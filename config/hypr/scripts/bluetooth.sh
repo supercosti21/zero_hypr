@@ -20,7 +20,7 @@ avvisa() { notify-send -a bluetooth "Bluetooth" "$1" 2>/dev/null || echo "$1" >&
 command -v bluetoothctl >/dev/null || { avvisa "bluetoothctl non c'e' (bluez-utils)"; exit 1; }
 
 # --- radio spenta: prima cosa da controllare, se no la scansione da' zero -------
-if ! bluetoothctl show 2>/dev/null | grep -q "Powered: yes"; then
+if ! bluetoothctl show 2>/dev/null | grep -qF "Powered: yes"; then
     scelta=$(printf 'Accendi il Bluetooth\nAnnulla' | menu 'bluetooth spento> ' 2 32)
     if [ "$scelta" = "Accendi il Bluetooth" ]; then
         bluetoothctl power on >/dev/null && avvisa "Bluetooth acceso"
@@ -37,19 +37,36 @@ fi
 # `devices` da' quelli gia' noti; una scansione breve aggiunge quelli nuovi.
 # Non si scansiona all'infinito: cinque secondi bastano per un paio di cuffie
 # accese, e una scansione perenne consuma batteria su entrambi i lati.
-elenca_voci() {
-    local noti connessi accoppiati
-    noti="$(bluetoothctl devices 2>/dev/null || true)"
-    connessi="$(bluetoothctl devices Connected 2>/dev/null || true)"
-    accoppiati="$(bluetoothctl devices Paired 2>/dev/null || true)"
+# Il parsing sta in una funzione a parte, che legge i tre elenchi da tre
+# argomenti invece che chiamare bluetoothctl: cosi' prova/parser.sh puo'
+# provarla coi campioni in prova/campioni/ senza avere una radio bluetooth.
+#
+# Il formato di `bluetoothctl devices` e' una riga per dispositivo:
+#     Device 04:52:C7:2A:1B:9F Cuffie Sony WH-1000XM4
+# `read -r _ mac nome` va bene perche' l'ULTIMA variabile prende tutto il resto
+# della riga: i nomi con spazi non si spezzano.
+#
+# I confronti sono `grep -qF`, letterali. Un MAC non contiene metacaratteri, ma
+# scriverlo esplicito costa una lettera e toglie la domanda.
+componi_voci() { # componi_voci <noti> <connessi> <accoppiati>
+    local noti="$1" connessi="$2" accoppiati="$3"
 
     printf '%s\n' "$noti" | while read -r _ mac nome; do
         [ -n "${mac:-}" ] || continue
+        # Il pallino pieno vince sul punto: connesso implica accoppiato, e
+        # mostrarli entrambi non direbbe niente in piu'.
         stato=""
-        printf '%s' "$accoppiati" | grep -q "$mac" && stato=" ·"
-        printf '%s' "$connessi"   | grep -q "$mac" && stato=" ●"
+        printf '%s\n' "$accoppiati" | grep -qF "$mac" && stato=" ·"
+        printf '%s\n' "$connessi"   | grep -qF "$mac" && stato=" ●"
         printf '󰂯 %s%s\t%s\n' "${nome:-$mac}" "$stato" "$mac"
     done
+}
+
+elenca_voci() {
+    componi_voci \
+        "$(bluetoothctl devices 2>/dev/null || true)" \
+        "$(bluetoothctl devices Connected 2>/dev/null || true)" \
+        "$(bluetoothctl devices Paired 2>/dev/null || true)"
 }
 
 cerca_nuovi() {
@@ -99,7 +116,7 @@ esac
 ################################################################################
 nome="${scelta#󰂯 }"; nome="${nome% ●}"; nome="${nome% ·}"
 
-if bluetoothctl devices Connected 2>/dev/null | grep -q "$mac"; then
+if bluetoothctl devices Connected 2>/dev/null | grep -qF "$mac"; then
     azioni='󰂲 Disconnetti\t--disconnetti\n󰆴 Dimentica\t--dimentica'
 else
     azioni='󰂱 Connetti\t--connetti\n󰆴 Dimentica\t--dimentica'

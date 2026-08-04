@@ -34,22 +34,54 @@ SINK="@DEFAULT_AUDIO_SINK@"
 SOURCE="@DEFAULT_AUDIO_SOURCE@"
 PASSO=5
 
+# Dove si tiene l'id dell'ultima notifica di ogni categoria. In
+# XDG_RUNTIME_DIR e non in ~/.cache: e' stato della sessione, deve sparire al
+# logout invece di restare a puntare a una notifica che non esiste piu'.
+STATO="${XDG_RUNTIME_DIR:-/tmp}/zero_hypr-osd"
+
 manda() { # manda <etichetta> <icona> <titolo> <valore 0-100 oppure vuoto>
     local etichetta="$1" icona="$2" titolo="$3" valore="${4:-}"
+    local file_id="$STATO/$etichetta" vecchio_id=""
+
+    mkdir -p "$STATO" 2>/dev/null
+    [ -r "$file_id" ] && vecchio_id="$(cat "$file_id" 2>/dev/null)"
+
     local args=(
         --app-name=osd
         --urgency=low
         --expire-time=1200
         --icon="$icona"
-        # Stessa etichetta = stessa notifica riusata, invece di una nuova.
+        # DUE strade per far SOSTITUIRE la notifica invece di impilarne una
+        # nuova, e non e' ridondanza inutile:
+        #
+        # 1. l'hint di Notify-OSD. swaync lo supporta, ma ci sono segnalazioni
+        #    di versioni in cui le notifiche si accumulano lo stesso;
+        # 2. --replace-id, che e' il meccanismo dello standard freedesktop:
+        #    notify-send -p restituisce l'id, lo si conserva e lo si ripassa.
+        #
+        # Se la prima funziona, la seconda e' innocua. Se non funziona, la
+        # seconda fa comunque il lavoro. Senza nessuna delle due, tenendo
+        # premuto il tasto del volume si riempie lo schermo.
         --hint="string:x-canonical-private-synchronous:$etichetta"
+        --print-id
     )
+    # Un id vecchio ma gia' scaduto non fa danni: il demone lo ignora e ne
+    # assegna uno nuovo, che e' esattamente quello che si vuole.
+    [ -n "$vecchio_id" ] && args+=(--replace-id="$vecchio_id")
+
     # Il valore intero fa disegnare la barra di avanzamento. Se manca (muto),
     # resta solo il testo, che e' giusto: una barra a zero e una barra
     # silenziata si confonderebbero.
     [ -n "$valore" ] && args+=(--hint="int:value:$valore")
 
-    notify-send "${args[@]}" "$titolo" >/dev/null 2>&1 || true
+    local nuovo_id
+    nuovo_id="$(notify-send "${args[@]}" "$titolo" 2>/dev/null)" || return 0
+    # -p stampa solo cifre. Se arriva altro, meglio non conservarlo che
+    # ripassare al demone qualcosa che non e' un id.
+    case "$nuovo_id" in
+        ''|*[!0-9]*) : ;;
+        *) printf '%s' "$nuovo_id" > "$file_id" 2>/dev/null ;;
+    esac
 }
 
 # ------------------------------------------------------------------- volume

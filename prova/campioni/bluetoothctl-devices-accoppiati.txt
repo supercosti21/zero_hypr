@@ -1,0 +1,2 @@
+Device 04:52:C7:2A:1B:9F Cuffie Sony WH-1000XM4
+Device A0:C5:89:11:22:33 Logitech MX Master 3

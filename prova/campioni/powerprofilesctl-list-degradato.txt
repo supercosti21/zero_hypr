@@ -1,0 +1,9 @@
+  performance:
+    Driver:     intel_pstate
+    Degraded:   high-operating-temperature
+
+* balanced:
+    Driver:     intel_pstate
+
+  power-saver:
+    Driver:     intel_pstate

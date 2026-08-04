@@ -76,25 +76,59 @@ sottomenu() { # sottomenu <prompt> <righe con TAB>
     printf '%s\n' "$righe" | grep -F -m1 -- "$scelta" | cut -f2
 }
 
-menu_audio() {
-    # Le uscite disponibili, con un pallino su quella in uso. `wpctl status`
-    # marca il default con un asterisco.
-    local righe
-    righe="$(wpctl status 2>/dev/null | awk '
-        /^Audio/        { in_audio = 1 }
-        /^Video/        { in_audio = 0 }
-        in_audio && /Sinks:/ { in_sink = 1; next }
-        in_sink && /^ *│ *$/ { in_sink = 0 }
-        in_sink && /[0-9]+\./ {
-            attivo = /\*/ ? " ●" : ""
-            # id: il numero prima del punto. nome: il resto della riga.
-            match($0, /[0-9]+\./); id = substr($0, RSTART, RLENGTH - 1) + 0
-            sub(/^[^0-9]*[0-9]+\.[[:space:]]*/, "")
-            sub(/[[:space:]]*\[vol:.*$/, "")
-            printf "󰓃  %s%s\t%d\n", $0, attivo, id
-        }')"
+# Legge `wpctl status` da stdin e stampa "<etichetta>\t<id>" per ogni uscita.
+# Separata dal comando apposta: cosi' prova/parser.sh puo' darle in pasto i
+# campioni in prova/campioni/ invece di aver bisogno di wireplumber.
+#
+# `wpctl status` disegna un albero con caratteri di box:
+#
+#   Audio
+#    ├─ Sinks:
+#    │  *   56. Built-in Audio Analog Stereo   [vol: 0.65]
+#    │      70. HDMI                           [vol: 1.00]
+#    │
+#    ├─ Sources:
+#
+# Due dettagli che la prima versione sbagliava:
+#   · la sezione finisce al PROSSIMO "├─", non su una riga di solo "│". La riga
+#     vuota c'e' quasi sempre, ma e' spaziatura, non un delimitatore;
+#   · l'asterisco del predefinito va cercato SOLO prima dell'id. Cercarlo in
+#     tutta la riga fa risultare attivo un dispositivo che ha un "*" nel nome —
+#     c'e' un campione apposta che lo verifica.
+leggi_uscite_audio() {
+    awk '
+        # Entrati in Sinks. Il next evita di trattare questa riga come una voce.
+        /├─ Sinks:/ { dentro = 1; next }
+        # Qualunque altra sezione chiude la precedente.
+        /├─/        { dentro = 0 }
 
-    [ -n "$righe" ] || { avvisa Audio "Nessuna uscita audio trovata"; return; }
+        dentro && match($0, /[0-9]+\./) {
+            id = substr($0, RSTART, RLENGTH - 1) + 0
+
+            # Solo la parte PRIMA dell id: e li che sta il marcatore.
+            prefisso = substr($0, 1, RSTART - 1)
+            attivo = (prefisso ~ /\*/) ? " ●" : ""
+
+            nome = substr($0, RSTART + RLENGTH)
+            sub(/[[:space:]]*\[vol:.*$/, "", nome)   # via il volume
+            sub(/^[[:space:]]+/, "", nome)           # via lo spazio di allineamento
+            sub(/[[:space:]]+$/, "", nome)
+            if (nome == "") next
+
+            printf "󰓃  %s%s\t%d\n", nome, attivo, id
+        }'
+}
+
+menu_audio() {
+    local righe
+    righe="$(wpctl status 2>/dev/null | leggi_uscite_audio)"
+
+    # A voce alta: un menu vuoto senza spiegazione sembra "non c'e' niente da
+    # scegliere", non "qualcosa non ha funzionato".
+    [ -n "$righe" ] || {
+        avvisa Audio "Nessuna uscita audio: 'wpctl status' non ha dato niente di leggibile"
+        return
+    }
 
     local id
     id="$(sottomenu 'uscita audio> ' "$righe")" || return
@@ -102,13 +136,26 @@ menu_audio() {
     wpctl set-default "$id" && avvisa Audio "Uscita cambiata"
 }
 
+# Legge `hyprctl clients -j` da stdin. Separata dal comando per poterla provare
+# col campione in prova/campioni/hyprctl-clients.json.
+#
+# mapped == true scarta le finestre che esistono ma non sono a schermo. Lo
+# scratchpad invece resta: workspace.name vale "special:magic", ed e' proprio
+# quella la finestra a cui puo' servire tornare.
+leggi_finestre() {
+    jq -r '
+        .[]
+        | select(.mapped == true)
+        | select((.title // "") != "")
+        | "󱂬  \(.workspace.name)  ·  \(.class)  ·  \(.title)\t\(.address)"
+    ' 2>/dev/null
+}
+
 menu_finestre() {
     # Un selettore di finestre: con cinque workspace e finestre affiancate,
     # trovare "quella dove stavo scrivendo" a colpi di SUPER+numero e' lento.
     local righe
-    righe="$(hyprctl clients -j 2>/dev/null | jq -r '
-        .[] | select(.mapped == true)
-        | "\(.workspace.name)  \(.class)  \(.title)\t\(.address)"' 2>/dev/null)"
+    righe="$(hyprctl clients -j 2>/dev/null | leggi_finestre)"
 
     [ -n "$righe" ] || { avvisa Finestre "Nessuna finestra aperta"; return; }
 
@@ -170,26 +217,77 @@ VOCI
     fi
 }
 
+# Legge `powerprofilesctl list` da stdin e stampa un nome di profilo per riga.
+#
+# L'output e' MULTI-RIGA, ed e' questo che rende il parsing meno ovvio di quanto
+# sembri:
+#
+#     performance:
+#         Driver:     intel_pstate
+#         Degraded:   no
+#
+#   * balanced:
+#         Driver:     intel_pstate
+#
+# Il filtro precedente era `grep -oE '^\*? *[a-z-]+:'`. Sul formato vero
+# funzionava, ma per il motivo sbagliato: le chiavi di dettaglio si chiamano
+# "Driver" e "Degraded", con la maiuscola, e la classe [a-z-] accetta solo
+# minuscole. Bastava che a monte comparisse una chiave minuscola — poniamo
+# "active:" — perche' nel menu spuntasse un profilo che non esiste.
+#
+# Il criterio giusto non e' il nome, e' la POSIZIONE: i profili stanno a inizio
+# riga (al massimo dopo "* "), le chiavi di dettaglio sono rientrate di quattro.
+# E' strutturale, quindi non si rompe con un nome nuovo.
+#
+# Niente elenco di profili ammessi, anche se sarebbe stato facile: oggi ppd ne
+# ha tre, ma se un giorno ne aggiungesse uno un elenco fisso lo farebbe sparire
+# dal menu in silenzio — che e' peggio di una voce di troppo, perche' non si
+# vede. Se qualcosa passasse comunque, `powerprofilesctl set` fallisce, e
+# adesso il fallimento si vede.
+leggi_profili_energia() {
+    awk '
+        # {0,3} e non *: e questa la riga che separa un profilo da un dettaglio.
+        /^\*?[[:space:]]{0,3}[a-z][a-z0-9_-]*:/ {
+            riga = $0
+            sub(/^\*/, "", riga)
+            sub(/^[[:space:]]+/, "", riga)
+            sub(/:.*$/, "", riga)
+            if (riga != "") print riga
+        }'
+}
+
 menu_energia() {
     command -v powerprofilesctl >/dev/null || {
         avvisa Energia "power-profiles-daemon non c'e'"; return; }
 
-    local attuale righe scelto
+    local attuale profili righe scelto
     attuale="$(powerprofilesctl get 2>/dev/null)"
-    righe="$(powerprofilesctl list 2>/dev/null | grep -oE '^\*? *[a-z-]+:' \
-             | tr -d '*: ' | while read -r p; do
+    profili="$(powerprofilesctl list 2>/dev/null | leggi_profili_energia)"
+
+    [ -n "$profili" ] || {
+        avvisa Energia "'powerprofilesctl list' non ha dato nessun profilo noto"
+        return
+    }
+
+    righe="$(printf '%s\n' "$profili" | while read -r p; do
                  [ -n "$p" ] || continue
                  marca=""; [ "$p" = "$attuale" ] && marca=" ●"
                  printf '󰓅  %s%s\t%s\n' "$p" "$marca" "$p"
-               done)"
+             done)"
 
     scelto="$(sottomenu 'profilo> ' "$righe")" || return
     [ -n "$scelto" ] || return
-    powerprofilesctl set "$scelto" && avvisa Energia "Profilo: $scelto"
+
+    # Il fallimento si vede: e' anche la rete di sicurezza se il parsing
+    # producesse una voce che profilo non e'.
+    if ! powerprofilesctl set "$scelto" 2>/dev/null; then
+        avvisa Energia "'$scelto' non e' stato accettato da powerprofilesctl"
+        return
+    fi
 
     # Detto chiaro, se no sembra che non abbia funzionato: alla prossima
     # attaccata o staccata del cavo, power-profile-auto rimette il suo.
-    avvisa Energia "Vale fino al prossimo cambio di alimentazione"
+    avvisa Energia "Profilo: $scelto — vale fino al prossimo cambio di alimentazione"
 }
 
 ################################################################################

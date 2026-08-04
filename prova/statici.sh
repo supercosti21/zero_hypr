@@ -88,7 +88,7 @@ fi
 
 echo
 echo "── Prove ──"
-for p in incrocio power-profile menu; do
+for p in incrocio power-profile parser menu; do
     if "./prova/$p.sh" >/dev/null 2>&1; then ok "prova/$p.sh"
     else ko "prova/$p.sh"; "./prova/$p.sh" 2>&1 | tail -20; fi
 done

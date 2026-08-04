@@ -1,0 +1,42 @@
+[
+  {
+    "address": "0x55d1a2b3c4d0",
+    "mapped": true,
+    "class": "Alacritty",
+    "title": "pol@nitro: ~/Git/zero_hypr",
+    "workspace": {
+      "id": 1,
+      "name": "1"
+    }
+  },
+  {
+    "address": "0x55d1a2b3c4e8",
+    "mapped": true,
+    "class": "firefox",
+    "title": "Hyprland Wiki \u2014 Mozilla Firefox",
+    "workspace": {
+      "id": 3,
+      "name": "3"
+    }
+  },
+  {
+    "address": "0x55d1a2b3c500",
+    "mapped": false,
+    "class": "Alacritty",
+    "title": "Alacritty",
+    "workspace": {
+      "id": 1,
+      "name": "1"
+    }
+  },
+  {
+    "address": "0x55d1a2b3c518",
+    "mapped": true,
+    "class": "Alacritty",
+    "title": "btop",
+    "workspace": {
+      "id": -99,
+      "name": "special:magic"
+    }
+  }
+]

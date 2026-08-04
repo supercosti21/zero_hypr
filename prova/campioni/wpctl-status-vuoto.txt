@@ -1,0 +1,12 @@
+PipeWire 'pipewire-0' [1.4.7, pol@nitro, cookie:1111111]
+ └─ Clients:
+        32. WirePlumber                         [1.4.7, pol@nitro, pid:1201]
+
+Audio
+ ├─ Devices:
+ │  
+ ├─ Sinks:
+ │  
+ ├─ Sources:
+ │  
+ └─ Streams:
