@@ -19,13 +19,17 @@ else
     _c() { printf '%s\n' "$2"; }
 fi
 
-azzurro() { _c 36 "$1"; }
-giallo()  { _c 33 "$1"; }
-verde()   { _c 32 "$1"; }
-rosso()   { _c 31 "$1"; }
+# Il "${1:-}" non e' pignoleria: chiamarle senza argomenti per stampare una riga
+# vuota e' naturale in mezzo a un blocco di avvisi, e con `set -u` (che hanno
+# tutti gli script qui) un $1 non definito farebbe morire lo script proprio
+# mentre sta spiegando all'utente cosa e' andato storto.
+azzurro() { _c 36 "${1:-}"; }
+giallo()  { _c 33 "${1:-}"; }
+verde()   { _c 32 "${1:-}"; }
+rosso()   { _c 31 "${1:-}"; }
 
 # Gli errori vanno su stderr, altrimenti spariscono in un `| tee` distratto.
-errore()  { rosso "$1" >&2; }
+errore()  { rosso "${1:-}" >&2; }
 
 titolo() {
     echo

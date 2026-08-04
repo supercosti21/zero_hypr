@@ -1,0 +1,72 @@
+#!/bin/sh
+#
+# power-profile-auto — sceglie il profilo energetico secondo l'alimentazione.
+# Installato in /usr/local/bin/ da sistema/udev.sh.
+#
+# CHI LO CHIAMA
+#   · /etc/udev/rules.d/99-power-profile-auto.rules — quando attacchi o stacchi
+#     l'alimentatore;
+#   · power-profile-auto.service — una volta all'avvio, perche' la regola udev
+#     scatta solo sui CAMBI: al boot il profilo sarebbe quello che il demone
+#     sceglie di suo, che non e' detto sia quello giusto.
+#
+# GIRA DA UDEV: ambiente minimo, nessun PATH garantito. Percorsi assoluti,
+# sempre, e niente bashismi.
+#
+# DIVISIONE DEL LAVORO
+# Il profilo della CPU e della piattaforma si tocca SOLO qui.
+# Blur, ombre e i profili di hypridle li gestisce
+# ~/.config/hypr/scripts/power-watch.sh, che vive dentro la sessione utente e
+# non ha modo di parlare con systemd di sistema. Sono due mondi separati di
+# proposito: questo gira come root senza sessione, quello come utente dentro
+# Hyprland.
+
+set -u
+
+PPCTL=/usr/bin/powerprofilesctl
+
+# In corrente NON "performance": la priorita' dichiarata di questo setup e'
+# sviluppo, batteria, estetica — in quest'ordine. Su un i9-13900H "performance"
+# vuol dire ventole sempre accese per compilare tre file. "balanced" lascia
+# comunque salire le frequenze quando serve davvero.
+IN_CORRENTE=balanced
+A_BATTERIA=power-saver
+
+# Sovrascrivibile per le prove: prova/ lo punta a un /sys finto.
+: "${POWER_SUPPLY_ROOT:=/sys/class/power_supply}"
+
+# Il demone puo' non essere ancora attivo quando udev scatta al primo avvio.
+# Uscire zitti e' giusto: ci pensera' power-profile-auto.service piu' tardi.
+systemctl is-active --quiet power-profiles-daemon 2>/dev/null || exit 0
+[ -x "$PPCTL" ] || exit 0
+
+# Alimentatore: si cerca QUALUNQUE alimentatore di rete, non "ACAD".
+# ACAD e' il nome che gli da' il firmware di questo Acer; su altre macchine e'
+# AC, ADP0, ADP1... Cercare per tipo invece che per nome costa tre righe e
+# rende lo script valido ovunque.
+in_corrente() {
+    for t in "$POWER_SUPPLY_ROOT"/*/type; do
+        [ -r "$t" ] || continue
+        [ "$(cat "$t")" = "Mains" ] || continue
+        online="${t%type}online"
+        [ -r "$online" ] || continue
+        [ "$(cat "$online")" = "1" ] && return 0
+    done
+    return 1
+}
+
+if in_corrente; then
+    voluto=$IN_CORRENTE
+else
+    voluto=$A_BATTERIA
+fi
+
+# Se il profilo non esiste su questo hardware non si insiste: meglio lasciare
+# quello che c'e' che far fallire la regola udev ad ogni evento.
+"$PPCTL" list 2>/dev/null | grep -q "$voluto" || exit 0
+
+# Gia' a posto: si esce senza scrivere. Gli eventi arrivano a raffica quando si
+# stacca il cavo, e ripetere la chiamata dbus quattro volte non serve a nessuno.
+[ "$("$PPCTL" get 2>/dev/null)" = "$voluto" ] && exit 0
+
+exec "$PPCTL" set "$voluto"

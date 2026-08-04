@@ -1,4 +1,14 @@
-# Cambia profilo energetico quando l'alimentatore viene attaccato/staccato.
-# systemd-run --no-block: udev non aspetta la chiamata DBus a power-profiles-daemon.
-SUBSYSTEM=="power_supply", KERNEL=="ACAD", ATTR{online}=="0|1", \
+# Cambia profilo energetico quando l'alimentatore viene attaccato o staccato.
+#
+# ENV{POWER_SUPPLY_TYPE}=="Mains" e non KERNEL=="ACAD": ACAD e' il nome che gli
+# da' il firmware di QUESTO Acer. Su altre macchine e' AC, ADP0, ADP1. Filtrare
+# per tipo invece che per nome costa uguale e non lega la regola a un modello.
+#
+# systemd-run --no-block: udev ha un timeout per ogni evento e non deve
+# aspettare una chiamata DBus a power-profiles-daemon. Senza --no-block, un
+# demone lento diventa un evento udev scaduto.
+#
+# La regola scatta solo sui CAMBI. All'avvio non cambia niente, quindi ci pensa
+# power-profile-auto.service, che chiama lo stesso binario una volta sola.
+SUBSYSTEM=="power_supply", ENV{POWER_SUPPLY_TYPE}=="Mains", \
 	RUN+="/usr/bin/systemd-run --no-block /usr/local/bin/power-profile-auto"

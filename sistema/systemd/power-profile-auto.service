@@ -1,0 +1,19 @@
+[Unit]
+# La regola udev scatta solo quando l'alimentatore CAMBIA stato. All'avvio non
+# cambia niente, quindi senza questo servizio il profilo resterebbe quello che
+# power-profiles-daemon sceglie di suo — tipicamente "balanced" anche a
+# batteria. Qui si allinea una volta sola, appena il demone e' su.
+Description=Allinea il profilo energetico all'alimentazione, all'avvio
+Documentation=file:///usr/local/bin/power-profile-auto
+After=power-profiles-daemon.service
+Wants=power-profiles-daemon.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/power-profile-auto
+# Lo script esce zitto se il demone non e' pronto: non e' un errore da
+# segnalare, e un fallimento qui non deve sporcare `systemctl --failed`.
+SuccessExitStatus=0
+
+[Install]
+WantedBy=multi-user.target
