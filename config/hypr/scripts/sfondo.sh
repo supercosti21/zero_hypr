@@ -4,9 +4,10 @@
 # Legato a SUPER+W.
 #
 # Uso:
-#   sfondo.sh                       selettore fuzzel sulle immagini della cartella
+#   sfondo.sh                       selettore fuzzel sulle immagini disponibili
 #   sfondo.sh ~/foto/altro.jpg      imposta direttamente quel file
-#   sfondo.sh --caso                una a caso dalla cartella
+#   sfondo.sh --caso                una a caso
+#   sfondo.sh --primo               solo se non ce n'e' gia' uno, e senza menu
 #
 # Perche' esiste: hyprpaper fa una cosa sola per volta. `hyprctl hyprpaper
 # wallpaper` cambia lo sfondo adesso ma si dimentica tutto al riavvio; scrivere
@@ -16,8 +17,21 @@
 
 set -euo pipefail
 
-CARTELLA="${SFONDI_DIR:-$HOME/Git/wallpapers}"
 QUI="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+# Dove cercare le immagini, in ordine. La prima e' la collezione personale, che
+# vive in un repo a parte e su una macchina appena installata non esiste; la
+# seconda e' lo sfondo di riserva dentro questo repo, che c'e' sempre.
+#
+# Senza la seconda, il primo avvio era: hyprpaper mostra nero, matugen non gira
+# perche' non ha un'immagine da cui estrarre, e i colori restano i semi. Cioe'
+# esattamente il momento in cui il desktop deve fare la sua figura migliore.
+#
+# SFONDI_DIR continua a sovrascrivere la prima, come prima.
+CARTELLE=(
+    "${SFONDI_DIR:-$HOME/Git/wallpapers}"
+    "$QUI/../../../sfondi"
+)
 
 # I due file che tengono un percorso di immagine. Entrambi hanno una sola riga
 # `path = ...` dentro un blocco (wallpaper{} e background{}), quindi la stessa
@@ -36,11 +50,16 @@ avvisa() {
 #  1. Elenco delle immagini disponibili
 ################################################################################
 # -print0 / -d '' per non inciampare sui nomi con spazi.
-# .git escluso: la cartella e' un repo, non serve pescare dentro gli oggetti.
+# .git escluso: la cartella puo' essere un repo, non serve pescare dentro gli
+# oggetti. Le cartelle che non esistono si saltano senza lamentarsi: e' normale
+# che la collezione personale non ci sia su una macchina appena installata.
 elenca() {
-    find -L "$CARTELLA" -type d -name .git -prune -o -type f \
-        \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \
-           -o -iname '*.webp' -o -iname '*.bmp' \) -print0 2>/dev/null | sort -z
+    for c in "${CARTELLE[@]}"; do
+        [ -d "$c" ] || continue
+        find -L "$c" -type d -name .git -prune -o -type f \
+            \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \
+               -o -iname '*.webp' -o -iname '*.bmp' \) -print0 2>/dev/null
+    done | sort -z
 }
 
 ################################################################################
@@ -48,11 +67,29 @@ elenca() {
 ################################################################################
 img="${1:-}"
 
+# --primo: lo chiama installa-tutto.sh a fine installazione, quando non c'e'
+# ancora nessuno davanti allo schermo. Quindi niente menu, e soprattutto niente
+# da fare se uno sfondo valido c'e' gia': reinstallare non deve cambiare la
+# scelta di chi lo aveva gia' impostato.
+if [ "$img" = "--primo" ]; then
+    gia="$(grep -m1 -E '^[[:space:]]*path[[:space:]]*=' "$HOME/.config/hypr/hyprpaper.conf" 2>/dev/null \
+           | sed 's/^[^=]*=[[:space:]]*//')"
+    if [ -n "$gia" ] && [ -f "$gia" ]; then
+        echo "sfondo gia' impostato: $(basename "$gia")"
+        exit 0
+    fi
+    # Il primo dell'elenco, non uno a caso: cosi' due installazioni sulla stessa
+    # macchina partono identiche, e se qualcosa non va si sa da che immagine.
+    mapfile -d '' -t trovate < <(elenca)
+    [ "${#trovate[@]}" -gt 0 ] || { echo "Nessuna immagine trovata." >&2; exit 1; }
+    img="${trovate[0]}"
+fi
+
 if [ -z "$img" ] || [ "$img" = "--caso" ]; then
     mapfile -d '' -t trovate < <(elenca)
 
     if [ "${#trovate[@]}" -eq 0 ]; then
-        avvisa "Nessuna immagine in $CARTELLA"
+        avvisa "Nessuna immagine in: ${CARTELLE[*]}"
         exit 1
     fi
 
@@ -86,10 +123,17 @@ img=$(realpath -e -- "$img" 2>/dev/null) || {
 ################################################################################
 # Via IPC il monitor va nominato: la forma ",percorso" (= tutti) funziona nel
 # file di config ma viene ignorata in silenzio dal comando IPC.
-while read -r mon; do
-    [ -n "$mon" ] || continue
-    hyprctl hyprpaper wallpaper "$mon,$img" >/dev/null
-done < <(hyprctl monitors -j | jq -r '.[].name')
+#
+# Solo se c'e' un compositore con cui parlare: installa-tutto.sh chiama --primo
+# a fine installazione, quando Hyprland non e' ancora partito. In quel caso non
+# c'e' niente da applicare adesso — basta scrivere nei file, e al primo avvio
+# hyprpaper legge da li'.
+if hyprctl monitors -j >/dev/null 2>&1; then
+    while read -r mon; do
+        [ -n "$mon" ] || continue
+        hyprctl hyprpaper wallpaper "$mon,$img" >/dev/null
+    done < <(hyprctl monitors -j | jq -r '.[].name')
+fi
 
 ################################################################################
 #  4. Rendi permanente: riscrive la riga `path` in hyprpaper.conf e hyprlock.conf
