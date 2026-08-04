@@ -10,8 +10,21 @@
 #   ./installa.sh --prova    dice cosa farebbe, senza toccare nulla
 #
 # Idempotente: rilanciarlo su un sistema gia' a posto non fa danni.
+#
+# Per l'installazione completa (pacchetti, driver, /etc) c'e' installa-tutto.sh,
+# che chiama anche questo script. Qui restano solo i symlink.
 
 set -euo pipefail
+
+# Mai con sudo: i symlink e i file di colore finirebbero di proprieta' di root
+# dentro ~/.config. Il desktop partirebbe lo stesso, ma matugen non potrebbe piu'
+# riscrivere la palette al cambio sfondo — e fallirebbe in silenzio, che e' il
+# modo peggiore. installa-tutto.sh usa sudo solo sugli script di sistema/.
+if [ "$(id -u)" = "0" ]; then
+    echo "Non lanciarlo con sudo: creerebbe file di root in ~/.config." >&2
+    echo "Lancialo da utente normale: ./installa.sh" >&2
+    exit 1
+fi
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEST="${XDG_CONFIG_HOME:-$HOME/.config}"
@@ -19,7 +32,7 @@ PROVA=0
 [ "${1:-}" = "--prova" ] && PROVA=1
 
 # Cartelle che vengono collegate a ~/.config/<nome>
-CARTELLE=(hypr waybar fuzzel mako swaync matugen alacritty xdg-desktop-portal)
+CARTELLE=(hypr waybar fuzzel swaync matugen alacritty xdg-desktop-portal)
 
 # Singoli file, per le app la cui cartella di config e' piena di stato che non
 # ha senso versionare (cache, estensioni, cronologie). Si collega solo il file
@@ -121,19 +134,15 @@ SEMI
 # --------------------------------------------------------- 3. cosa resta a te
 cat <<'FINE'
 
-Fatto. Cosa NON fa questo script, di proposito:
+Fatto: i collegamenti a ~/.config ci sono.
 
-  · pacchetti — vedi README.md, sezione "Dipendenze". Sono tutti nei repo
-    ufficiali, niente AUR.
+Questo script, di proposito, non installa pacchetti e non tocca /etc. Se sei
+su una macchina nuova manca ancora tutto il resto — pacchetti, driver NVIDIA,
+regole udev, portachiavi, schermata di accesso. Fa tutto un comando solo:
 
-  · file di sistema — in sistema/ ci sono le copie delle regole udev
-    (nomi GPU stabili, profilo energetico). Vanno installate a mano con
-    sudo, perche' toccano /etc:
+    ./installa-tutto.sh --prova     dice cosa farebbe
+    ./installa-tutto.sh             lo fa (chiede la password sudo una volta)
 
-      sudo cp sistema/udev/*.rules /etc/udev/rules.d/
-      sudo udevadm control --reload-rules && sudo udevadm trigger
-
-  · lo sfondo — le immagini stanno in un repo a parte (~/Git/wallpapers).
-    Dopo il primo avvio: SUPER+W.
+Per controllare com'e' messo il sistema in qualsiasi momento:  ./verifica.sh
 
 FINE

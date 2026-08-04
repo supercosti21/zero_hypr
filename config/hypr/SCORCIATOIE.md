@@ -7,7 +7,7 @@
 |---|---|
 | `SUPER` + `Invio` | Terminale (Alacritty) |
 | `SUPER` + `R` / `D` | Launcher applicazioni |
-| `SUPER` + `E` | Gestore file |
+| `SUPER` + `E` | Gestore file (Thunar) |
 | `SUPER` + `Q` | Chiudi finestra |
 | `SUPER` + `V` | Storico appunti |
 | `SUPER` + `W` | Cambia sfondo (immagini in `~/Git/wallpapers`) |
@@ -80,9 +80,9 @@ quella cartella — niente altro da fare. Varianti da terminale:
 (una a caso), `SFONDI_DIR=~/altra/cartella scripts/sfondo.sh` (altra cartella).
 
 **Dopo aver modificato un config:**
-- `hyprland.conf` → si ricarica da solo
+- `hyprland.lua` → `hyprctl reload`
 - `waybar` → `killall -SIGUSR2 waybar`
-- `mako` → `makoctl reload`
+- `swaync` → `swaync-client -rs` (stile) o `swaync-client -R` (config)
+- `fuzzel` e `alacritty` → niente, rileggono da soli
 
-**Tornare a COSMIC:** basta uscire (`SUPER` + `Shift` + `E`) e scegliere COSMIC
-nel menu a tendina del greeter. Niente è stato disinstallato.
+**Controllare che il sistema sia a posto:** `./verifica.sh` dalla radice del repo.

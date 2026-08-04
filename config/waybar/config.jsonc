@@ -39,10 +39,10 @@
   ],
 
   // ------------------------------------------------------------------ sinistra
-  // I workspace sono dinamici in stile COSMIC: li crea e distrugge
-  // scripts/workspace-dinamici.py, che tiene sempre un vuoto in coda.
-  // Qui NON va "persistent-workspaces": sarebbe un elenco fisso e litigherebbe
-  // col demone.
+  // Cinque workspace fissi, sempre presenti. A tenerli in vita e' Hyprland:
+  // hyprland.lua dichiara `persistent = true` per ognuno con hl.workspace_rule.
+  // Qui NON va "persistent-workspaces": duplicherebbe quell'elenco in un
+  // secondo posto, e le due liste finirebbero prima o poi a divergere.
   "hyprland/workspaces": {
     "format": "{id}",
     "on-click": "activate",

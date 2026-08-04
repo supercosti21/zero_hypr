@@ -17,8 +17,15 @@
 set -euo pipefail
 
 CARTELLA="${SFONDI_DIR:-$HOME/Git/wallpapers}"
-CONF="$HOME/.config/hypr/hyprpaper.conf"
 QUI="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+# I due file che tengono un percorso di immagine. Entrambi hanno una sola riga
+# `path = ...` dentro un blocco (wallpaper{} e background{}), quindi la stessa
+# sostituzione vale per tutti e due.
+#   hyprpaper.conf -> lo sfondo del desktop
+#   hyprlock.conf  -> lo sfondo della schermata di blocco, cosi' segue il primo
+CONF_SFONDO="$HOME/.config/hypr/hyprpaper.conf"
+CONF_BLOCCO="$HOME/.config/hypr/hyprlock.conf"
 
 avvisa() {
     command -v notify-send >/dev/null && notify-send -a sfondo "Sfondo" "$1" \
@@ -85,32 +92,54 @@ while read -r mon; do
 done < <(hyprctl monitors -j | jq -r '.[].name')
 
 ################################################################################
-#  4. Rendi permanente: riscrive la riga `path` dentro il blocco wallpaper
+#  4. Rendi permanente: riscrive la riga `path` in hyprpaper.conf e hyprlock.conf
 ################################################################################
 # Si tocca solo quella riga: commenti e resto del file restano intatti.
 # Il percorso arriva come argomento, non interpolato: nomi con spazi o apici
 # non rompono niente.
-python3 - "$CONF" "$img" <<'PY'
+#
+# L'errore su un file non deve impedire di scrivere l'altro: se hyprlock.conf e'
+# stato modificato a mano, lo sfondo del desktop deve comunque restare.
+if ! motivo=$(python3 - "$img" "$CONF_SFONDO" "$CONF_BLOCCO" <<'PY' 2>&1
 import sys, pathlib, re
 
-conf, img = pathlib.Path(sys.argv[1]), sys.argv[2]
-testo = conf.read_text()
+img, files = sys.argv[1], sys.argv[2:]
+problemi = []
 
-# Sostituisce il primo "path = ..." conservando l'indentazione originale.
-nuovo, n = re.subn(
-    r'^([ \t]*)path\s*=.*$',
-    lambda m: f"{m.group(1)}path = {img}",
-    testo,
-    count=1,
-    flags=re.MULTILINE,
-)
+for f in files:
+    conf = pathlib.Path(f)
+    if not conf.is_file():
+        problemi.append(f"{conf.name}: non esiste")
+        continue
 
-if n == 0:
-    sys.exit(f"nessuna riga 'path =' trovata in {conf}: il file e' stato "
-             f"modificato a mano? Lo sfondo e' comunque applicato adesso.")
+    testo = conf.read_text()
 
-conf.write_text(nuovo)
+    # Sostituisce il primo "path = ..." conservando l'indentazione originale.
+    # In entrambi i file ce n'e' esattamente una, dentro il blocco che serve.
+    nuovo, n = re.subn(
+        r'^([ \t]*)path\s*=.*$',
+        lambda m: f"{m.group(1)}path = {img}",
+        testo,
+        count=1,
+        flags=re.MULTILINE,
+    )
+
+    if n == 0:
+        problemi.append(f"{conf.name}: nessuna riga 'path ='")
+        continue
+
+    if nuovo != testo:
+        conf.write_text(nuovo)
+
+if problemi:
+    sys.exit("; ".join(problemi))
 PY
+); then
+    # Non e' fatale: lo sfondo e' gia' applicato a schermo, si perde solo la
+    # persistenza al riavvio. Dirlo pero' serve, altrimenti la prossima
+    # accensione sembra aver "dimenticato" la scelta senza motivo.
+    avvisa "Sfondo applicato, ma non reso permanente: $motivo"
+fi
 
 ################################################################################
 #  5. Rigenera la palette dallo sfondo e ricarica chi la usa

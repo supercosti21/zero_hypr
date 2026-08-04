@@ -1,7 +1,7 @@
 --------------------------------------------------------------------------------
 --  Hyprland — Acer Nitro ANV15-51 (i9-13900H + Iris Xe / RTX 4060 Max-Q)
 --  Impostazione: tiling puro, tastiera-first, orientato a sviluppo e batteria.
---  COSMIC resta installato: si sceglie la sessione dal greeter al login.
+--  Installazione pulita: CachyOS con GRUB, ly e Hyprland, nient'altro.
 --
 --  FORMATO: Lua. Il vecchio hyprland.conf resta accanto come riferimento ma
 --  NON viene piu' letto: quando esiste un .lua, Hyprland ignora il .conf.
@@ -97,9 +97,9 @@ hl.on("hyprland.start", function()
     -- Sfondo, barra, notifiche
     hl.exec_cmd("hyprpaper")
     hl.exec_cmd("waybar")
-    -- swaync se installato (ha il pannello con lo storico), altrimenti mako.
-    -- I due sono entrambi demoni di org.freedesktop.Notifications e si escludono:
-    -- lo script sceglie, cosi' non si resta mai senza notifiche.
+    -- Uno script e non `exec-once = swaync` secco: se swaync mancasse si
+    -- resterebbe senza notifiche in silenzio, e lo script invece lo dice.
+    -- Un demone solo: org.freedesktop.Notifications e' un nome dbus unico.
     hl.exec_cmd(scripts .. "/notifiche.sh")
 
     -- Storico appunti (SUPER+V). Due watcher: testo e immagini.
@@ -241,6 +241,12 @@ hl.config({
     input = {
         kb_layout = "it",
 
+        -- Bloc Num acceso all'avvio della sessione, cosi' il tastierino numerico
+        -- scrive cifre invece di muovere il cursore. Hyprland lo tiene spento di
+        -- default. Il corrispettivo per la schermata di accesso sta in
+        -- /etc/ly/config.ini (numlock = true), lo mette sistema/greeter-ly.sh.
+        numlock_by_default = true,
+
         follow_mouse = 1,
         -- Il focus segue il mouse ma senza portare la finestra in primo piano da
         -- sola: evita cambi di focus accidentali mentre si scrive.
@@ -289,7 +295,10 @@ end
 --------------------------------------------------------------------------------
 local mod  = "SUPER"
 local term = "alacritty"
-local file = "cosmic-files"
+-- Thunar e non Nautilus: tema-gtk.sh imposta adw-gtk3, che e' un tema GTK3.
+-- Nautilus e' GTK4/libadwaita e lo ignorerebbe, restando l'unica finestra
+-- fuori tono di tutto il desktop. In piu' Thunar pesa molto meno.
+local file = "thunar"
 local menu = "fuzzel"
 
 -- --- Essenziali ---
