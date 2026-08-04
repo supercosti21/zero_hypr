@@ -399,17 +399,28 @@ hl.bind(mod .. " + SHIFT + P", hl.dsp.exec_cmd("hyprpicker -a"))
 local premibile = { locked = true, repeating = true }
 local bloccato  = { locked = true }
 
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+"), premibile)
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),        premibile)
-hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),       bloccato)
-hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),     bloccato)
-hl.bind("XF86AudioPlay",        hl.dsp.exec_cmd("playerctl play-pause"),                             bloccato)
-hl.bind("XF86AudioNext",        hl.dsp.exec_cmd("playerctl next"),                                   bloccato)
-hl.bind("XF86AudioPrev",        hl.dsp.exec_cmd("playerctl previous"),                               bloccato)
+-- Volume e luminosita' passano da osd.sh invece di chiamare wpctl e
+-- brightnessctl direttamente: fanno la stessa cosa, ma mostrano anche quanto
+-- sei arrivato. Prima non c'era nessun riscontro a schermo, e schiacciare tre
+-- volte senza vedere niente non dice se sei a zero, se il tasto non va o se
+-- stai regolando l'uscita sbagliata. Il "riquadro" e' una notifica di swaync,
+-- che e' gia' in esecuzione e gia' intonato allo sfondo.
+local osd = scripts .. "/osd.sh"
+
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd(osd .. " volume su"),    premibile)
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd(osd .. " volume giu"),   premibile)
+hl.bind("XF86AudioMute",        hl.dsp.exec_cmd(osd .. " volume muto"),  bloccato)
+hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd(osd .. " microfono muto"), bloccato)
+
+-- Questi restano diretti: playerctl non ha un valore da mostrare, e una
+-- notifica ad ogni "avanti" darebbe fastidio invece di aiutare.
+hl.bind("XF86AudioPlay",        hl.dsp.exec_cmd("playerctl play-pause"),  bloccato)
+hl.bind("XF86AudioNext",        hl.dsp.exec_cmd("playerctl next"),        bloccato)
+hl.bind("XF86AudioPrev",        hl.dsp.exec_cmd("playerctl previous"),    bloccato)
 
 -- --- Luminosita' schermo ---
-hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl set 5%+"), premibile)
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set 5%-"), premibile)
+hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd(osd .. " luce su"),  premibile)
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd(osd .. " luce giu"), premibile)
 
 -- --- Chiusura del coperchio: blocca e spegne il pannello ---
 hl.bind("switch:on:Lid Switch",  hl.dsp.exec_cmd("hyprlock & hyprctl dispatch dpms off"), bloccato)
